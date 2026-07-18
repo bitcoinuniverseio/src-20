@@ -1,4 +1,272 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Implementation and verification guide for SRC-20."><meta name="theme-color" content="#071016"><title>SRC-20 build guide | Bitcoin Universe Docs</title><style>
-:root{--accent:hsl(351 88% 60%);--ink:#edf4f8;--muted:#9bb0bd;--paper:#071016;--panel:#0d1921;--line:rgba(214,239,247,.13);--soft:rgba(255,255,255,.045)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:radial-gradient(900px 480px at 82% -80px,hsla(351,90%,56%,.25),transparent 64%),radial-gradient(680px 540px at -12% 38%,hsla(69,82%,48%,.12),transparent 70%),var(--paper);font:16px/1.62 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.top{height:74px;display:flex;gap:22px;align-items:center;max-width:1200px;margin:auto;padding:0 26px;border-bottom:1px solid var(--line);position:relative;z-index:4}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:760;letter-spacing:-.02em}.brand b{display:grid;place-items:center;width:30px;height:30px;border:1px solid color-mix(in srgb,var(--accent),white 25%);border-radius:9px;color:#081115;background:var(--accent);font-size:11px;box-shadow:0 0 30px color-mix(in srgb,var(--accent),transparent 65%)}nav{display:flex;gap:3px;margin-left:18px}nav a,.repo{color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:8px;font-size:14px}nav a:hover,nav a.active{color:var(--ink);background:var(--soft)}.repo{margin-left:auto;border:1px solid var(--line);color:var(--ink)}.wrap{max-width:1200px;margin:auto;padding:0 26px}.hero{min-height:520px;padding:82px 0 56px;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:55px;align-items:center}.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800}.hero h1{font-size:clamp(48px,7.7vw,94px);letter-spacing:-.078em;line-height:.94;margin:13px 0 22px;max-width:720px}.hero p{color:#bed0da;font-size:20px;line-height:1.55;max-width:690px;margin:0}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}.chip{padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:#c3d1d8;background:rgba(255,255,255,.025);font-size:12px}.cta{display:inline-flex;align-items:center;gap:9px;margin-top:29px;padding:11px 15px;background:var(--accent);color:#061118;text-decoration:none;font-weight:800;border-radius:10px;box-shadow:0 12px 32px color-mix(in srgb,var(--accent),transparent 77%)}.orbit{height:380px;position:relative;display:grid;place-items:center;isolation:isolate}.orbit:before,.orbit:after{content:"";position:absolute;border:1px solid color-mix(in srgb,var(--accent),transparent 55%);border-radius:50%;z-index:-1}.orbit:before{width:310px;height:310px;transform:rotate(24deg) scaleY(.58)}.orbit:after{width:365px;height:365px;border-color:var(--line);transform:rotate(-39deg) scaleY(.33)}.core{width:168px;height:168px;border-radius:34px;display:grid;place-items:center;background:linear-gradient(140deg,color-mix(in srgb,var(--accent),white 22%),var(--accent));color:#051014;font-size:58px;font-weight:900;letter-spacing:-.11em;box-shadow:0 0 0 17px rgba(255,255,255,.028),0 0 60px color-mix(in srgb,var(--accent),transparent 58%);transform:rotate(-10deg)}.node{position:absolute;border:1px solid var(--line);background:#0b1922;color:#c8d9e1;padding:7px 9px;border-radius:8px;font-size:12px}.node.one{top:42px;right:0}.node.two{bottom:42px;left:8px}.node.three{right:22px;bottom:104px}.divider{height:1px;background:var(--line)}section{padding:82px 0}.section-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:50px;margin-bottom:34px}.section-head h2{letter-spacing:-.052em;font-size:clamp(29px,4.1vw,51px);line-height:1.03;margin:6px 0 0}.section-head p{color:var(--muted);align-self:end;margin:0;font-size:17px}.grid{display:grid;gap:16px}.four{grid-template-columns:repeat(4,1fr)}.three{grid-template-columns:repeat(3,1fr)}.card{border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));border-radius:15px;padding:20px;min-width:0}.card .number{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.11em}.card h3{font-size:18px;letter-spacing:-.025em;line-height:1.2;margin:15px 0 8px}.card p{color:var(--muted);font-size:14px;margin:0}.steps{counter-reset:step}.step{counter-increment:step;position:relative;padding:22px 17px 18px 29px;border-left:1px solid var(--line)}.step:before{content:counter(step,decimal-leading-zero);position:absolute;top:22px;left:-11px;color:var(--accent);font-size:10px;font-weight:900;background:var(--paper);padding:3px}.step h3{margin:0 0 7px;font-size:17px;line-height:1.25}.step p{margin:0;color:var(--muted);font-size:14px}.callout{border-left:3px solid var(--accent);border-radius:0 12px 12px 0;background:color-mix(in srgb,var(--accent),transparent 91%);padding:20px 22px;color:#ccdae0}.callout b{display:block;color:var(--ink);margin-bottom:5px}.packet{padding:0;overflow:hidden}.packet header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:800}.packet button{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 7px;cursor:pointer;font:inherit;font-size:11px}.packet button:hover{color:var(--ink)}pre{white-space:pre-wrap;overflow:auto;padding:18px;margin:0;color:#c5e7f3;font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;background:#071219}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:690px;background:rgba(255,255,255,.018)}th,td{text-align:left;padding:14px 15px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:rgba(255,255,255,.025)}td{font-size:14px;color:#c0d0d8}td:first-child{font-family:ui-monospace,monospace;color:#ecf5f8;font-weight:700}tr:last-child td{border-bottom:0}.checklist{list-style:none;padding:0;margin:0;display:grid;gap:10px}.checklist li{display:flex;gap:11px;padding:13px 14px;border:1px solid var(--line);border-radius:10px;color:#c9d8de;background:rgba(255,255,255,.025)}.checklist li:before{content:'✓';display:grid;place-items:center;flex:0 0 20px;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,var(--accent),transparent 80%);color:var(--accent);font-weight:900}.sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.source{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 16px;border:1px solid var(--line);border-radius:11px;color:var(--ink);text-decoration:none;background:rgba(255,255,255,.025)}.source small{color:var(--muted);white-space:nowrap}.footer{padding:34px 0 48px;border-top:1px solid var(--line);color:#78909e;font-size:13px}.footer a{color:#b9cad0}.guide-list{display:grid;gap:0;counter-reset:guide}.guide-list article{counter-increment:guide;display:grid;grid-template-columns:62px 1fr;gap:18px;padding:24px 0;border-bottom:1px solid var(--line)}.guide-list article:before{content:counter(guide,decimal-leading-zero);color:var(--accent);font-weight:900;font-size:14px}.guide-list h3{margin:0 0 5px;font-size:19px;letter-spacing:-.025em}.guide-list p{margin:0;color:var(--muted)}.mini{font-size:13px;color:var(--muted)}@media(max-width:800px){.top{padding:0 16px;height:auto;min-height:66px;flex-wrap:wrap;gap:8px}.brand{margin-right:auto}nav{order:3;margin:0 -8px 7px;width:100%;overflow:auto}.repo{margin:0}.wrap{padding:0 17px}.hero{grid-template-columns:1fr;padding:56px 0 26px;gap:5px;min-height:0}.hero h1{font-size:58px}.orbit{height:230px;transform:scale(.72);margin:-28px}.section-head{grid-template-columns:1fr;gap:15px}.four,.three{grid-template-columns:1fr}.sources{grid-template-columns:1fr}section{padding:55px 0}}
-</style></head><body><header class="top"><a class="brand" href="index.html"><b>S20</b><span>SRC-20</span></a><nav><a class="" href="index.html">Overview</a><a class="" href="reference.html">Reference</a><a class="active" href="guide.html">Build & verify</a><a href="#sources">Sources</a></nav><a class="repo" href="https://github.com/bitcoinuniverse/src-20-docs">GitHub ↗</a></header><main><div class="wrap hero" style="min-height:410px"><div><div class="eyebrow">Implementation playbook</div><h1 style="font-size:clamp(46px,7vw,82px)">Build.<br><i style="font-style:normal;color:var(--accent)">Verify.</i><br>Ship.</h1><p>SRC-20 is safe to integrate only when the payload, transaction layout, and reader state agree.</p><a class="cta" href="reference.html">Review fields first <span>→</span></a></div><div class="orbit" aria-hidden="true"><div class="core">✓</div><span class="node one">preflight</span><span class="node two">transaction</span><span class="node three">indexer</span></div></div><div class="divider"></div><section><div class="wrap"><div class="section-head"><div><div class="eyebrow">End-to-end builder</div><h2>A deliberate path to broadcast.</h2></div><p>Each step forms a product requirement, a test case, and a support artifact. Do not hide protocol-critical information behind a generic send button.</p></div><div class="guide-list"><article><div><h3>Read the active deployment record and normalize the ticker before deciding it is available.</h3><p>Record the evidence for this stage so a failed preview or unexpected confirmation can be reproduced and explained.</p></div></article><article><div><h3>Build the payload as valid JSON and place it in the accepted STAMP carrier for your toolchain.</h3><p>Record the evidence for this stage so a failed preview or unexpected confirmation can be reproduced and explained.</p></div></article><article><div><h3>For deploy and mint, make the intended owner the first transaction output.</h3><p>Record the evidence for this stage so a failed preview or unexpected confirmation can be reproduced and explained.</p></div></article><article><div><h3>For transfer, confirm the first input belongs to the indexed sender before signing.</h3><p>Record the evidence for this stage so a failed preview or unexpected confirmation can be reproduced and explained.</p></div></article><article><div><h3>Keep the intended recipient in vout 0 and review all extra outputs for accidental protocol effects.</h3><p>Record the evidence for this stage so a failed preview or unexpected confirmation can be reproduced and explained.</p></div></article><article><div><h3>Wait for an SRC-20 compatible indexer to report the event and compare supply, balance, and owner.</h3><p>Record the evidence for this stage so a failed preview or unexpected confirmation can be reproduced and explained.</p></div></article></div></div></section><section><div class="wrap"><div class="section-head"><div><div class="eyebrow">Release gate</div><h2>Before production traffic.</h2></div><p>Use these checks for automated tests, integration rehearsals, and final transaction review.</p></div><ul class="checklist"><li>Ticker and numbers meet the current character and decimal rules.</li><li>The supply state leaves room for the requested mint.</li><li>The transaction has the intended vout 0 owner.</li><li>The first input is controlled by the expected sender for transfers.</li><li>The event appears in the Stampchain-compatible indexer with the expected result.</li></ul><div class="callout" style="margin-top:30px"><b>Operational caution</b>SRC-20 validity depends on the message and the transaction layout. Test both with the indexer version you will use in production.</div></div></section><section id="sources"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Source trail</div><h2>Read the active implementation.</h2></div><p>These links are the starting point for release-aware rules and reference behavior. Check them again before production use.</p></div><div class="sources"><a class="source" href="https://docs.openstamp.io/introduction/src20-protocol/src20-on-bitcoin" target="_blank" rel="noreferrer"><span>SRC-20 on Bitcoin</span><small>Open ↗</small></a><a class="source" href="https://stampchain.io/docs" target="_blank" rel="noreferrer"><span>Stampchain documentation</span><small>Open ↗</small></a></div></div></section></main><footer class="footer"><div class="wrap">Built by <a href="https://github.com/bitcoinuniverse">Bitcoin Universe</a>. Review live protocol implementations before signing a transaction.</div></footer><script>for(const b of document.querySelectorAll('[data-copy]'))b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);const t=b.textContent;b.textContent='Copied';setTimeout(()=>b.textContent=t,1200)}catch{b.textContent='Select text'}})</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A careful SRC-20 builder guide within the Stamps, SRC-20 and SRC-101 documentation set, covering preflight, PSBT inspection, broadcast, indexed verification, fees, and recovery.">
+  <meta name="theme-color" content="#0d0a0d">
+  <title>SRC-20 build and verify | Stamps, SRC-20 and SRC-101</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="brand" href="index.html" aria-label="Stamps, SRC-20 and SRC-101 home">
+        <img class="brand-logo" src="assets/stampchain-logo-480.svg" alt="" aria-hidden="true">
+        <span>Stamps, SRC-20 and SRC-101</span>
+      </a>
+      <nav class="site-nav" aria-label="Documentation">
+        <a href="index.html">Overview</a>
+        <a href="reference.html">Protocol reference</a>
+        <a href="https://bitcoinuniverse.github.io/src-101/">SRC-101 docs</a>
+        <a href="guide.html" aria-current="page">Build and verify</a>
+        <a href="universe.html">Universe profile</a>
+        <a href="sources.html">Sources</a>
+      </nav>
+      <a class="header-link" href="security.md">Security notes</a>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">Builder and verification guide</div>
+          <h1>Build.<br><span style="color:var(--green)">Inspect.</span><br>Reconcile.</h1>
+          <p class="lede">An SRC-20 operation is only complete after the correct transaction confirms and the target indexer reports the intended state. This guide treats construction and verification as one workflow.</p>
+          <div class="hero-actions">
+            <a class="button" href="#workflow">Use the release workflow <span aria-hidden="true">&darr;</span></a>
+            <a class="button secondary" href="universe.html">Universe-specific behavior</a>
+          </div>
+        </div>
+        <aside class="hero-panel">
+          <div class="label">The source of truth changes by step</div>
+          <div class="protocol-map">
+            <div>
+              <strong>Before signing</strong>
+              <span>Target indexer state and the fully decoded PSBT.</span>
+            </div>
+            <div>
+              <strong>After broadcast</strong>
+              <span>Txid, network propagation, confirmation depth, and reorg state.</span>
+            </div>
+            <div>
+              <strong>After indexing</strong>
+              <span>Indexer event classification plus deploy, supply, and address-balance results.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">End-to-end workflow</div>
+            <h2>Make every decision observable.</h2>
+          </div>
+          <p>The sequence below is deliberately conservative. It prevents the most expensive failure mode: broadcasting a valid Bitcoin transaction that the intended indexer cannot recognize or cannot credit.</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <div>
+              <h3>Pin the target indexer, carrier era, and network.</h3>
+              <p>Record the indexer name, release or commit, mainnet or testnet, and the carrier format it accepts at the target chain height. The maintained Stamps indexer is experimental and protocol changes are coordinated through SIPs, so a release pin is part of the integration contract.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Resolve current state immediately before building.</h3>
+              <p>For deploy, look up the case-normalized ticker. For mint, read the deployed maximum, per-mint limit, decimals, and remaining supply. For transfer, read the source address balance from the same indexer you expect to credit the transaction.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Create a strict canonical JSON payload.</h3>
+              <p>Emit lowercase <code>p</code> and <code>op</code>, a compact object, and quoted decimal strings. Use only required fields plus deliberately supported metadata. Do not rely on parser repairs, number truncation, unknown fields, or a JSON address field.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Bind source and destination with transaction positions.</h3>
+              <p>Make the intended source address control the first input. For deployment, that first input defines the creator. For mint and transfer, put the intended credited owner or recipient at output zero. The local deploy profile also uses sender dust at output zero, but that output does not define creator identity.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Use a tested carrier builder, then inspect its PSBT.</h3>
+              <p>Construct the relevant era-specific carrier with a released library or the Universe profile. Do not turn a high-level decoder diagram into a home-grown production encoder without test vectors and indexer evidence.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Review every bitcoin output before signing.</h3>
+              <p>Confirm output zero, the data outputs, change, miner fee, and every product service fee. Verify the network and address formats. A correct SRC-20 payload does not make unfamiliar outputs safe.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Broadcast, persist evidence, and wait for the right observation.</h3>
+              <p>Store the exact JSON, unsigned and signed transaction identifiers where allowed, txid, timestamp, fee rate, and target indexer version. A mempool result is only a transport result. Wait for confirmation and then the target indexer's classification.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Reconcile state and communicate the actual outcome.</h3>
+              <p>Read the indexer's event status, token supply, and both account balances. Tell the user whether Bitcoin confirmed, whether a Stamp payload was recognized, and whether SRC-20 state changed. Treat a reorg as a normal state to revisit.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Preflight checklist</div>
+            <h2>Reject predictable failures locally.</h2>
+          </div>
+          <p>Local validation does not create protocol consensus, but it saves users from paying for obvious mistakes. Reject a request before PSBT creation when any of these conditions fail.</p>
+        </div>
+        <ul class="checklist">
+          <li>The selected network, target indexer, carrier profile, and activation era match one another.</li>
+          <li>The ticker is one to five characters and follows the exact target indexer rules. Use ASCII alphanumeric ticks unless you have deliberate compatibility tests.</li>
+          <li><code>max</code> and <code>lim</code> are positive whole decimal strings at or below <code>18446744073709551615</code>.</li>
+          <li><code>dec</code> is omitted or is an integer from 0 through 18.</li>
+          <li><code>amt</code> is a positive plain decimal string that fits the deployed decimal precision and avoids exponent notation.</li>
+          <li>The token exists before mint or transfer, and the mint or transfer state has been refreshed from the target indexer.</li>
+          <li>The intended source or deploy creator can occupy <code>vin[0]</code>, and the intended mint or transfer recipient can occupy <code>vout[0]</code>.</li>
+          <li>All product fees are shown independently from the miner fee, and the final user-visible cost is based on the actual PSBT outputs.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">PSBT review</div>
+            <h2>Inspect the spend, not only the protocol intent.</h2>
+          </div>
+          <p>Most wallet incidents are output-review failures. Present this review in the product before the wallet is asked to sign, and make it readable without requiring users to understand carrier bytes.</p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <div class="kicker">Inputs</div>
+            <h3>Confirm the authority path.</h3>
+            <ul>
+              <li>The first input spends an output controlled by the address whose SRC-20 balance should be used.</li>
+              <li>Every additional input is expected and belongs to the user or an explicitly named funding flow.</li>
+              <li>Input selection has not accidentally spent a protected asset or unexpected UTXO.</li>
+              <li>The transaction is built for the expected Bitcoin network.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <div class="kicker">Outputs</div>
+            <h3>Confirm the routing and cost path.</h3>
+            <ul>
+              <li>Output zero follows the local sender-dust convention for deploy, and belongs to the intended credited minter or transfer recipient for mint and transfer.</li>
+              <li>Data carrier outputs match the selected profile and do not replace the destination at output zero.</li>
+              <li>Change returns to the intended user address.</li>
+              <li>Every fee output has a named recipient, stated purpose, and amount in the review.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="callout danger" style="margin-top:16px">
+          <strong>Never blind-sign a third-party PSBT.</strong>
+          Official SRC-20 material warns that third-party transactions can include additional outputs that send BTC to an address the user does not control. Require an output-level review even when a trusted service prepared the event.
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">What the indexer can do</div>
+            <h2>Explain caps and failures precisely.</h2>
+          </div>
+          <p>Clear language avoids promising an exact post-state amount before a stateful indexer evaluates the event. The user should understand the intended amount and the valid indexed result.</p>
+        </div>
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Situation</th>
+                <th>Expected state behavior</th>
+                <th>Good product copy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Mint request exceeds <code>lim</code></td>
+                <td>The eligible result is capped by the per-mint limit.</td>
+                <td>"The indexer may credit up to the token's per-mint limit, not the entire requested amount."</td>
+              </tr>
+              <tr>
+                <td>Mint request exceeds remaining supply</td>
+                <td>The eligible result is capped by the remaining supply.</td>
+                <td>"The indexer may credit only the remaining unminted supply."</td>
+              </tr>
+              <tr>
+                <td>Supply already exhausted</td>
+                <td>The mint is an invalid SRC-20 transition.</td>
+                <td>"Bitcoin may confirm this transaction, but the token is already fully minted."</td>
+              </tr>
+              <tr>
+                <td>Transfer exceeds indexed balance</td>
+                <td>The transfer is invalid and changes neither account balance.</td>
+                <td>"This transfer cannot be credited because the indexed source balance is insufficient."</td>
+              </tr>
+              <tr>
+                <td>Carrier recognized but state invalid</td>
+                <td>Can remain a valid Stamp while failing SRC-20 state rules.</td>
+                <td>"The transaction was recognized on-chain, but it did not create the requested SRC-20 ledger change."</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Recovery and support evidence</div>
+            <h2>Capture enough to reproduce an outcome.</h2>
+          </div>
+          <p>A support request should be diagnosable without asking a user to expose seed phrases, private keys, or unnecessary wallet data.</p>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <div class="kicker">Capture</div>
+            <h3>Stable diagnostic data</h3>
+            <p>Txid, network, chain height or confirmation count, target indexer version, action, case-normalized tick, requested amount, output-zero address, and event status.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">Compare</div>
+            <h3>Before and after state</h3>
+            <p>Persist the preflight balance or supply snapshot and compare it with the post-indexed state. Use the same indexer for both readings.</p>
+          </article>
+          <article class="card danger">
+            <div class="kicker">Never request</div>
+            <h3>Secret material</h3>
+            <p>Never request a seed phrase, private key, signing secret, or a full wallet export. A txid and a redacted PSBT output summary are normally sufficient.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>Stamps, SRC-20 and SRC-101, a Bitcoin Universe documentation guide.</span>
+      <span><a href="security.md">Security notes</a> | Reviewed 2026-07-18</span>
+    </div>
+  </footer>
+</body>
+</html>
