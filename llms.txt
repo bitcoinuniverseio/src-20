@@ -1,38 +1,51 @@
-# SRC-20 | Bitcoin Universe Protocol Reference
+# SRC-20
 
-> Human docs: index.html
-> Field reference: reference.html
-> Network: Bitcoin
-> Classification: Bitcoin Stamps fungible tokens
+> STAMP-native fungible tokens, indexed from valid SRC-20 operations.
 
-## Summary
+## Chain and carrier
 
-A Bitcoin Stamps fungible token protocol modeled after BRC-20 and encoded directly on Bitcoin rather than through Counterparty in its current form.
+- Chain: Bitcoin
+- Carrier: Bitcoin Stamps JSON
+
+## Overview
+
+SRC-20 uses JSON messages to deploy, mint, and transfer tokens within the Bitcoin Stamps ecosystem. Current SRC-20 behavior is direct on Bitcoin after activation, rather than relying on Counterparty.
 
 ## State model
 
-Bitcoin Stamps protocol messages and an indexer-derived state machine for deployed, minted, and transferred balances.
+The deployment and mint receiver are derived from vout 0. A transfer is authorized by the first input owner and routes the resulting balance to vout 0, so transaction construction is part of protocol validity.
 
 ## Lifecycle
 
-1. Deploy ticker
-2. Mint supply
-3. Sign from holder
-4. Transfer balance
+1. Deploy a unique ticker and its supply ceiling.
+2. Mint within the per-mint limit and remaining supply.
+3. Spend from the address that owns the indexed balance.
+4. Route the destination through vout 0 and verify the indexed state.
 
-## Operations
+## Rules
 
-- Deploy: Defines a ticker, maximum supply, optional mint limit, and optional decimal precision.
-- Mint: Adds valid units to the recipient according to the deployment rules.
-- Transfer: Moves an amount that is no larger than the sender's indexed available balance.
+- Tickers are compared case-insensitively and the first valid deployment wins.
+- Ticker length is one to five permitted characters.
+- max and lim are unsigned integer quantities, and dec is 0 through 18.
+- Minting above remaining supply can be reduced to the remaining amount by indexer rules.
+- A transfer above the holder balance is invalid, not partially settled.
+- For valid operations, vout 0 has protocol meaning. Never reorder it casually.
 
-## Safety
+## Field reference
 
-1. SRC-20 rules changed at activation height 796000. Use documentation and indexer software that agree on the active rules.
-2. The transaction must be authenticated by the address that controls the relevant balance. Do not sign third-party prepared transactions blindly.
-3. Confirm exact ticker and mint status in a compatible explorer before paying mining fees.
+- p (string, required: yes): Literal src-20.
+- op (string, required: yes): deploy, mint, or transfer.
+- tick (string, required: yes): One to five allowed ticker characters.
+- max (uint64 string, required: deploy): Total cap.
+- lim (uint64 string, required: deploy): Per-mint cap.
+- dec (0-18 integer, required: no): Precision, defaulting to 18.
+- amt (decimal string, required: mint / transfer): Positive quantity, no more than 18 decimal places.
 
-## Sources
+## Primary sources
 
-- OpenStamp SRC-20 specification: https://docs.openstamp.io/introduction/src20-protocol/src20-on-bitcoin
-- Stampchain API: https://stampchain.io/docs
+- SRC-20 on Bitcoin: https://docs.openstamp.io/introduction/src20-protocol/src20-on-bitcoin
+- Stampchain documentation: https://stampchain.io/docs
+
+## Operational caution
+
+SRC-20 validity depends on the message and the transaction layout. Test both with the indexer version you will use in production.
