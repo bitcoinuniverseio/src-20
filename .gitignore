@@ -1,0 +1,2 @@
+# The nested SRC-101 checkout retains its independent Git history and publishes from its own repository.
+src-101-docs/

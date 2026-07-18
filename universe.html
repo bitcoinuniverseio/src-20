@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Bitcoin Universe SRC-20 construction profile within the Stamps, SRC-20 and SRC-101 documentation set, including output layout, pricing disclosure, order lifecycle, API boundaries, and conformance requirements.">
+  <meta name="theme-color" content="#0d0a0d">
+  <title>Universe SRC-20 profile | Stamps, SRC-20 and SRC-101</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="brand" href="index.html" aria-label="Stamps, SRC-20 and SRC-101 home">
+        <img class="brand-logo" src="assets/stampchain-logo-480.svg" alt="" aria-hidden="true">
+        <span>Stamps, SRC-20 and SRC-101</span>
+      </a>
+      <nav class="site-nav" aria-label="Documentation">
+        <a href="index.html">Overview</a>
+        <a href="reference.html">Protocol reference</a>
+        <a href="https://bitcoinuniverse.github.io/src-101/">SRC-101 docs</a>
+        <a href="guide.html">Build and verify</a>
+        <a href="universe.html" aria-current="page">Universe profile</a>
+        <a href="sources.html">Sources</a>
+      </nav>
+      <a class="header-link" href="api-reference.md">API reference</a>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">Bitcoin Universe integration profile</div>
+          <h1>Protocol rules<br>and <span style="color:var(--green)">product rules.</span></h1>
+          <p class="lede">Bitcoin Universe constructs SRC-20 orders with an OLGA-style P2WSH payload path. This is a documented product profile, not a claim that every SRC-20 indexer accepts every implementation detail. Target-indexer conformance remains required.</p>
+          <div class="hero-actions">
+            <a class="button" href="#profile">Read the profile <span aria-hidden="true">&darr;</span></a>
+            <a class="button secondary" href="conformance-vectors.md">Open conformance vectors</a>
+          </div>
+        </div>
+        <aside class="hero-panel">
+          <div class="label">Scope of this page</div>
+          <div class="protocol-map">
+            <div>
+              <strong>Protocol rule</strong>
+              <span>A rule interpreted by a compatible Stamps / SRC-20 indexer.</span>
+            </div>
+            <div>
+              <strong>Universe rule</strong>
+              <span>A local validation, fee, API, order, or construction behavior.</span>
+            </div>
+            <div>
+              <strong>Conformance evidence</strong>
+              <span>Proof that the constructed transaction is accepted by the named target indexer.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="profile">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Universe order profile</div>
+            <h2>What the local builder does today.</h2>
+          </div>
+          <p>This section documents current implementation behavior in this repository. It is intentionally separate from the general SRC-20 reference so a product detail never becomes accidental protocol folklore.</p>
+        </div>
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Universe behavior</th>
+                <th>Classification</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Carrier</td>
+                <td>Builds a <code>stamp:</code>-prefixed UTF-8 JSON payload into an OLGA-style P2WSH data-output sequence, with a frame before payload chunking.</td>
+                <td>Construction profile. Test against the intended indexer.</td>
+              </tr>
+              <tr>
+                <td>Data outputs</td>
+                <td>Uses 32-byte P2WSH chunks with 330-sat data outputs in the current builder.</td>
+                <td>Local implementation parameter, not an SRC-20 token rule.</td>
+              </tr>
+              <tr>
+                <td>Output zero</td>
+                <td>Places a dust output for the receiver at <code>vout[0]</code>. Transfer and mint use a supplied receiver when present; deployment defaults to sender dust, while creator identity remains at <code>vin[0]</code>.</td>
+                <td>Designed to align with reference transaction-derived address semantics.</td>
+              </tr>
+              <tr>
+                <td>Output order</td>
+                <td>Recipient dust, data outputs, configured service-fee output, then change when applicable.</td>
+                <td>Local transaction layout. Review before every signature.</td>
+              </tr>
+              <tr>
+                <td>Order lifetime</td>
+                <td>Unsigned orders expire after one hour.</td>
+                <td>Universe product behavior.</td>
+              </tr>
+              <tr>
+                <td>Bulk mint</td>
+                <td>Allows 1 through 10 independent mint transactions through a funding fan-out flow.</td>
+                <td>Universe product behavior. Each resulting transaction still needs independent indexer acceptance.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warning" style="margin-top:16px">
+          <strong>Conformance is a release gate.</strong>
+          The maintained Stamps indexer identifies OLGA/P2WSH SRC-20 as active from block 865,000. Before calling a Universe build profile interoperable, capture a real transaction and target-indexer result for every supported operation.
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Local preflight policy</div>
+            <h2>Stricter than historical parser quirks.</h2>
+          </div>
+          <p>Universe validates requests before it creates a PSBT. These checks provide user protection and deterministic UX. They do not override a third-party indexer's protocol implementation.</p>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <div class="kicker">Ticker</div>
+            <h3>Normalize and validate.</h3>
+            <p>The current implementation trims, validates one to five code points against its configured character policy, and returns an uppercase display value. Use plain ASCII ticks for widest compatibility.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">Supply fields</div>
+            <h3>Plain positive integers only.</h3>
+            <p>Universe requires <code>max</code> and <code>lim</code> as positive digit-only strings within uint64 maximum. It intentionally rejects separators and exponents rather than relying on historical coercion.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">Amount</div>
+            <h3>Precision is explicit.</h3>
+            <p>The local API accepts a finite positive numeric input and serializes it as a plain decimal string with up to 18 fractional places. Values above JavaScript safe-integer precision are rejected at the builder boundary.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">Decimals</div>
+            <h3>Zero through eighteen.</h3>
+            <p>Deployment decimals are optional and must be an integer from 0 through 18. When omitted, the indexer default of 18 is used.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">Metadata</div>
+            <h3>Optional and bounded.</h3>
+            <p>Deployment metadata fields <code>desc</code>, <code>x</code>, <code>tg</code>, <code>web</code>, and <code>email</code> are trimmed strings with a current 200-character maximum. They are indexer metadata, not token authorization.</p>
+          </article>
+          <article class="card warn">
+            <div class="kicker">UI compatibility</div>
+            <h3>Do not promise an untested fractional UX.</h3>
+            <p>The protocol can represent precision according to <code>dec</code>, but any client form must validate and display the actual fractional behavior it supports before presenting the flow as available.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Costs and output disclosure</div>
+            <h2>Separate protocol, network, and product costs.</h2>
+          </div>
+          <p>SRC-20 itself does not impose a Bitcoin consensus fee or a universal service fee. A wallet must show the actual transaction costs and any product fee independently, at the exact amount being signed.</p>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <div class="kicker">Miner fee</div>
+            <h3>Bitcoin network cost</h3>
+            <p>Calculated from the selected fee rate and the actual transaction footprint. It changes with the number of inputs, P2WSH data outputs, change, and any bulk mint flow.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">Dust outputs</div>
+            <h3>Carrier and recipient values</h3>
+            <p>The current Universe builder includes an output-zero dust recipient and 330-sat data outputs. These are transaction values, not an SRC-20 token amount.</p>
+          </article>
+          <article class="card warn">
+            <div class="kicker">Universe service fee</div>
+            <h3>Product charge, currently 1,500 sats</h3>
+            <p>At the current repository configuration, a 1,500-sat Universe service fee is added per operation. Bulk mint totals multiply it by the number of mint transactions. Always use the displayed PSBT amount as the final value.</p>
+          </article>
+        </div>
+        <div class="callout danger" style="margin-top:16px">
+          <strong>Fee safety rule</strong>
+          Do not describe a Universe service fee as a required SRC-20 protocol fee. Do not describe miner fee as a service charge. The signed transaction must show each category separately.
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Order lifecycle</div>
+            <h2>Orders are inspectable objects, not opaque requests.</h2>
+          </div>
+          <p>The local API separates creation, signing, broadcasting, and confirmation. A client should preserve the review artifact and report the most specific state it knows.</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <div>
+              <h3>Create an order.</h3>
+              <p><code>POST /src20/order</code> validates the request, builds the canonical payload, creates one or more PSBTs, estimates miner and product costs, and returns the review data.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Review and sign in the wallet.</h3>
+              <p>The client verifies inputs and all outputs. It signs only the expected PSBT or ordered bulk PSBT collection before the one-hour order expiry.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Broadcast the signed result.</h3>
+              <p><code>POST /src20/order/:orderId/broadcast</code> receives one signed PSBT or the complete bulk set, finalizes the transactions, and broadcasts the raw transactions.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div>
+              <h3>Observe status and reconcile external indexing.</h3>
+              <p><code>GET /src20/order/:orderId</code> exposes the order record. Token list and balance endpoints read indexer data, which should be used to verify the eventual SRC-20 state.</p>
+            </div>
+          </article>
+        </div>
+        <p class="source-date">See <a href="api-reference.md">the API reference</a> for current endpoint shapes and bounds. Treat it as a local implementation interface, not an external standard.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Conformance evidence</div>
+            <h2>What must be true before a release.</h2>
+          </div>
+          <p>Conformance is not a screenshot of a successful broadcast. It is a set of reproducible transactions and observed indexer results tied to a named release and test environment.</p>
+        </div>
+        <ul class="checklist">
+          <li>One deploy, mint, and transfer transaction each built by the released Universe path and accepted by the named target indexer.</li>
+          <li>Evidence that the expected creator, minter, and recipient addresses are derived from <code>vin[0]</code> and <code>vout[0]</code> as intended.</li>
+          <li>Negative vectors for duplicate deploy, undeployed mint, exhausted mint, insufficient-balance transfer, invalid ticker, invalid amount, and wrong-output-zero layout.</li>
+          <li>Output review snapshots showing recipient dust, data outputs, service fee, change, miner fee, and total cost.</li>
+          <li>Reorg or confirmation behavior agreed by the product, including how a pending order is represented before indexer acceptance.</li>
+          <li>Versioned test evidence linked to the Universe release, target indexer release, and network used for the test.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>Stamps, SRC-20 and SRC-101, a Bitcoin Universe documentation guide.</span>
+      <span><a href="universe-transaction-profile.md">Detailed profile</a> | Reviewed 2026-07-18</span>
+    </div>
+  </footer>
+</body>
+</html>

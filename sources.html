@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Source hierarchy, compatibility decisions, and maintenance policy for Bitcoin Universe Stamps, SRC-20 and SRC-101 documentation.">
+  <meta name="theme-color" content="#0d0a0d">
+  <title>Sources and policy | Stamps, SRC-20 and SRC-101</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="brand" href="index.html" aria-label="Stamps, SRC-20 and SRC-101 home">
+        <img class="brand-logo" src="assets/stampchain-logo-480.svg" alt="" aria-hidden="true">
+        <span>Stamps, SRC-20 and SRC-101</span>
+      </a>
+      <nav class="site-nav" aria-label="Documentation">
+        <a href="index.html">Overview</a>
+        <a href="reference.html">Protocol reference</a>
+        <a href="https://bitcoinuniverse.github.io/src-101/">SRC-101 docs</a>
+        <a href="guide.html">Build and verify</a>
+        <a href="universe.html">Universe profile</a>
+        <a href="sources.html" aria-current="page">Sources</a>
+      </nav>
+      <a class="header-link" href="sources.md">Source notes</a>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">Documentation authority and maintenance</div>
+          <h1>Trace every<br><span style="color:var(--green)">rule to a source.</span></h1>
+          <p class="lede">SRC-20 has historical formats and evolving implementation details, while SRC-101 has a separate strict name and record model. These pages distinguish primary source, implementation behavior, and conservative product guidance so readers can tell what must be pinned and tested.</p>
+          <div class="hero-actions">
+            <a class="button" href="#hierarchy">See the source hierarchy <span aria-hidden="true">&darr;</span></a>
+            <a class="button secondary" href="changelog.md">Read the documentation changelog</a>
+          </div>
+        </div>
+        <aside class="hero-panel">
+          <div class="label">Current documentation status</div>
+          <p style="margin-top:14px"><span class="status">Reviewed 2026-07-18</span></p>
+          <p class="muted">This guide is an integration aid. It does not grant protocol authority, guarantee marketplace acceptance, or substitute for a pinned target indexer and its tests.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="hierarchy">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Authority order</div>
+            <h2>Use the narrowest source that answers the question.</h2>
+          </div>
+          <p>When a published explainer, SDK page, and source code disagree, do not average them. Choose the release-specific target indexer implementation and record the decision in the integration evidence.</p>
+        </div>
+        <div class="grid four">
+          <article class="card">
+            <div class="kicker">1. Target indexer release</div>
+            <h3>Acceptance behavior</h3>
+            <p>For production, the actual release and its fixtures decide the decoding and ledger behavior you need to interoperate with.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">2. Maintained protocol project</div>
+            <h3>Current chronology and process</h3>
+            <p>The maintained Bitcoin Stamps indexer documents protocol history, active components, and the SIP process.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">3. Technical specifications</div>
+            <h3>Message and carrier context</h3>
+            <p>The Stamps SDK, OLGA specification, and OpenStamp documentation provide detailed compatibility and historical context.</p>
+          </article>
+          <article class="card">
+            <div class="kicker">4. Universe source tree</div>
+            <h3>Product behavior</h3>
+            <p>Local code documents the exact API, PSBT construction, fee configuration, and validation profile shipped by Universe.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Primary references</div>
+            <h2>What each source is good for.</h2>
+          </div>
+          <p>External links can change. Before shipping a new builder or parser, pin a commit or release and store the URL with the resulting conformance record.</p>
+        </div>
+        <div class="source-list">
+          <a href="https://github.com/stampchain-io/stampchain.io/tree/dev/static/img/presskit" target="_blank" rel="noreferrer">
+            <span><strong>Stamps official press-kit assets</strong><br><span class="muted small">The unchanged Stamps mark and purple palette used throughout this documentation set.</span></span>
+            <small>Brand</small>
+          </a>
+          <a href="https://github.com/stampchain-io/btc_stamps" target="_blank" rel="noreferrer">
+            <span><strong>Bitcoin Stamps maintained indexer</strong><br><span class="muted small">Protocol chronology, active components, release practices, and indexer implementation context.</span></span>
+            <small>Primary</small>
+          </a>
+          <a href="https://bitcoinstamps.xyz/en/protocols/src-20" target="_blank" rel="noreferrer">
+            <span><strong>Bitcoin Stamps SRC-20 protocol page</strong><br><span class="muted small">Public protocol overview, lifecycle, and supported feature context.</span></span>
+            <small>Primary</small>
+          </a>
+          <a href="https://github.com/stampchain-io/btc_stamps/blob/main/indexer/src/index_core/src20.py" target="_blank" rel="noreferrer">
+            <span><strong>SRC-20 indexer implementation</strong><br><span class="muted small">State-transition and semantic-validation behavior for the maintained codebase.</span></span>
+            <small>Implementation</small>
+          </a>
+          <a href="https://github.com/stampchain-io/btc_stamps/blob/main/indexer/src/index_core/src101.py" target="_blank" rel="noreferrer">
+            <span><strong>SRC-101 indexer implementation</strong><br><span class="muted small">Strict name and record operations, field validation, and lifecycle behavior.</span></span>
+            <small>Implementation</small>
+          </a>
+          <a href="https://github.com/stampchain-io/btc_stamps/blob/main/indexer/src/index_core/transaction_utils.py" target="_blank" rel="noreferrer">
+            <span><strong>Transaction parsing utilities</strong><br><span class="muted small">Carrier framing and transaction-derived source and destination behavior.</span></span>
+            <small>Implementation</small>
+          </a>
+          <a href="https://github.com/stampchain-io/stamps_sdk/blob/main/docs/src20specs.md" target="_blank" rel="noreferrer">
+            <span><strong>Stamps SDK SRC-20 specification</strong><br><span class="muted small">Legacy direct-Bitcoin examples, validation notes, and compatibility history.</span></span>
+            <small>Reference</small>
+          </a>
+          <a href="https://docs.openstamp.io/introduction/src20-protocol/src20-on-bitcoin" target="_blank" rel="noreferrer">
+            <span><strong>OpenStamp SRC-20 documentation</strong><br><span class="muted small">Historical explanation of the direct-Bitcoin shift and legacy transaction format.</span></span>
+            <small>Reference</small>
+          </a>
+          <a href="https://github.com/mikeinspace/stamps/blob/main/OLGA.md" target="_blank" rel="noreferrer">
+            <span><strong>OLGA proposal</strong><br><span class="muted small">P2WSH framing, two-byte length prefix, 32-byte chunking, and historical activation context.</span></span>
+            <small>Carrier</small>
+          </a>
+          <a href="https://github.com/stampchain-io/btc_stamps/issues/686" target="_blank" rel="noreferrer">
+            <span><strong>SIP process and cross-indexer coordination</strong><br><span class="muted small">Why a draft SIP is not automatically a live behavior for integrations.</span></span>
+            <small>Governance</small>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Known documentation divergences</div>
+            <h2>Resolve them explicitly, never silently.</h2>
+          </div>
+          <p>The protocol has evolved. Historical sources remain useful, but a builder needs a concrete compatibility decision rather than a blended summary.</p>
+        </div>
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>What differs</th>
+                <th>Documentation decision</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Direct Bitcoin activation</td>
+                <td>Older prose focuses on the 796,000 Counterparty cutoff. The maintained indexer chronology identifies direct Bitcoin at 793,068.</td>
+                <td>Document both boundaries: direct Bitcoin begins at 793,068 and Counterparty SRC-20 ends after 796,000.</td>
+              </tr>
+              <tr>
+                <td>Current carrier</td>
+                <td>Legacy descriptions use bare multisig plus ARC4. Maintained chronology identifies OLGA / P2WSH for SRC-20 from 865,000.</td>
+                <td>Label bare multisig as a historical direct-Bitcoin path and P2WSH as the current maintained path. Pin the target indexer release.</td>
+              </tr>
+              <tr>
+                <td>Ticker characters</td>
+                <td>Older material describes broad special-character and emoji behavior. Current implementations use a precise configured allowlist.</td>
+                <td>Recommend one to five ASCII alphanumeric characters for new integrations and link the exact target configuration for wider support.</td>
+              </tr>
+              <tr>
+                <td>Numeric parsing</td>
+                <td>Historical parser behavior can tolerate or truncate some forms that a strict builder should not create.</td>
+                <td>Use quoted plain positive decimal strings, no separators, no exponent notation, and whole strings for <code>max</code> and <code>lim</code>.</td>
+              </tr>
+              <tr>
+                <td>State failure</td>
+                <td>Some sources imply invalid SRC-20 operations never become Stamps. Current fixtures distinguish Stamp success from SRC-20 state failure.</td>
+                <td>State that a semantic failure can preserve a recognized Stamp while producing no SRC-20 balance or supply change.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Universe implementation sources</div>
+            <h2>Keep product documentation tied to code.</h2>
+          </div>
+          <p>These local modules power the Universe profile. When behavior changes, update the matching documentation and add a conformance vector in the same change.</p>
+        </div>
+        <div class="source-list">
+          <a href="../../../backend/src/src20/src20.service.ts">
+            <span><strong>Universe SRC-20 service</strong><br><span class="muted small">Order creation, output layout, fee disclosure, bulk mint flow, expiration, and broadcasting.</span></span>
+            <small>Local source</small>
+          </a>
+          <a href="../../../backend/src/src20/src20-validation.utils.ts">
+            <span><strong>Universe SRC-20 validation</strong><br><span class="muted small">Ticker, amount, supply, decimal, and metadata preflight behavior.</span></span>
+            <small>Local source</small>
+          </a>
+          <a href="../../../backend/src/src20/src20.controller.ts">
+            <span><strong>Universe SRC-20 controller</strong><br><span class="muted small">Current REST surface for tokens, balances, order creation, retrieval, and broadcasting.</span></span>
+            <small>Local source</small>
+          </a>
+          <a href="universe-transaction-profile.md">
+            <span><strong>Universe transaction profile</strong><br><span class="muted small">Human-readable local construction profile and release-gate checklist.</span></span>
+            <small>Local guide</small>
+          </a>
+          <a href="https://bitcoinuniverse.github.io/src-101/">
+            <span><strong>Published SRC-101 documentation</strong><br><span class="muted small">Separate SRC-101 overview, reference, build guide, and repository history.</span></span>
+            <small>Open docs</small>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Update policy</div>
+            <h2>Change docs with evidence, not after an incident.</h2>
+          </div>
+          <p>A protocol-facing copy update can change user expectations. Treat it as an interface change and update it with the same discipline as a transaction builder change.</p>
+        </div>
+        <div class="note-list">
+          <article>
+            <h3>When an upstream release or SIP changes interpretation</h3>
+            <p>Pin the source version, reproduce the change with a test vector, update the compatibility table, and add a dated note to <a href="changelog.md">the documentation changelog</a>.</p>
+          </article>
+          <article>
+            <h3>When Universe changes transaction construction, validation, or cost</h3>
+            <p>Update the Universe profile, API reference, security notes, and conformance vectors in the same change. Do not leave a product fee or output-order change hidden in source code.</p>
+          </article>
+          <article>
+            <h3>When sources conflict</h3>
+            <p>Do not declare a universal rule. State the scope, link both sources, and describe the conservative product behavior until a target indexer release resolves the question.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>Stamps, SRC-20 and SRC-101, a Bitcoin Universe documentation guide.</span>
+      <span><a href="sources.md">Source notes</a> | Reviewed 2026-07-18</span>
+    </div>
+  </footer>
+</body>
+</html>
