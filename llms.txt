@@ -1,0 +1,38 @@
+# SRC-20 | Bitcoin Universe Protocol Reference
+
+> Human docs: index.html
+> Field reference: reference.html
+> Network: Bitcoin
+> Classification: Bitcoin Stamps fungible tokens
+
+## Summary
+
+A Bitcoin Stamps fungible token protocol modeled after BRC-20 and encoded directly on Bitcoin rather than through Counterparty in its current form.
+
+## State model
+
+Bitcoin Stamps protocol messages and an indexer-derived state machine for deployed, minted, and transferred balances.
+
+## Lifecycle
+
+1. Deploy ticker
+2. Mint supply
+3. Sign from holder
+4. Transfer balance
+
+## Operations
+
+- Deploy: Defines a ticker, maximum supply, optional mint limit, and optional decimal precision.
+- Mint: Adds valid units to the recipient according to the deployment rules.
+- Transfer: Moves an amount that is no larger than the sender's indexed available balance.
+
+## Safety
+
+1. SRC-20 rules changed at activation height 796000. Use documentation and indexer software that agree on the active rules.
+2. The transaction must be authenticated by the address that controls the relevant balance. Do not sign third-party prepared transactions blindly.
+3. Confirm exact ticker and mint status in a compatible explorer before paying mining fees.
+
+## Sources
+
+- OpenStamp SRC-20 specification: https://docs.openstamp.io/introduction/src20-protocol/src20-on-bitcoin
+- Stampchain API: https://stampchain.io/docs
