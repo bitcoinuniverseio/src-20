@@ -1,118 +1,32 @@
-# Stamps, SRC-20 and SRC-101
+# Stamps, SRC-20 & SRC-101
 
-> Bitcoin Universe technical guide for Bitcoin Stamps, SRC-20, and SRC-101.
+> Bitcoin Stamps transforms transaction data into lasting digital culture. SRC-20 brings fungible assets; SRC-101 adds names and records.
 
-## Naming
+## Public experience
 
-- Public name: Stamps, SRC-20 and SRC-101.
-- Stamps is the umbrella Bitcoin meta-protocol and asset ecosystem.
-- SRC-20 is the fungible-token layer within the Stamps ecosystem.
-- SRC-101 is the name and record layer within the Stamps ecosystem.
-- Keep technical identifiers unchanged: protocol literal "src-20", route "/src20", tab ID "src20", folder "src-20-docs".
-- Keep SRC-101 technical identifiers unchanged: protocol literal "src-101", tab ID "src101", local nested checkout folder "src-101-docs". Its live documentation is https://bitcoinuniverse.github.io/src-101/.
-- Do not use "cSRC-20" as if it were a canonical protocol. If needed, define it only as a local term for legacy Counterparty-era SRC-20.
+- Home: https://bitcoinuniverse.github.io/src-20/
+- Discover: https://bitcoinuniverse.github.io/src-20/reference.html
+- Get started: https://bitcoinuniverse.github.io/src-20/guide.html
+- Bitcoin Universe: https://inscribe.bitcoinuniverse.io/
 
-## Source of truth
+## The experience
 
-1. Pin the target Bitcoin Stamps indexer release and its tests. Its behavior controls interoperability.
-2. Use the maintained indexer for active chronology and implementation context:
-   https://github.com/stampchain-io/btc_stamps
-3. Use the Stamps SDK specification for legacy and compatibility details:
-   https://github.com/stampchain-io/stamps_sdk/blob/main/docs/src20specs.md
-4. Use the OLGA specification for P2WSH carrier framing:
-   https://github.com/mikeinspace/stamps/blob/main/OLGA.md
-5. Use the active SRC-101 implementation for names and records:
-   https://github.com/stampchain-io/btc_stamps/blob/main/indexer/src/index_core/src101.py
+- Stamps: Discover art and culture preserved through Bitcoin transaction history.
+- SRC-20: Explore fungible assets with deploy, mint, and transfer activity.
+- SRC-101: Build identity through namespaces, unique names, renewals, and records.
 
-The protocol is experimental and indexer-dependent. Do not claim that Bitcoin consensus enforces SRC-20 balances, supply, or tick uniqueness.
+## In plain language
 
-## SRC-101 scope
+- Durable media: Stamps content is carried through Bitcoin transaction data.
+- Community assets: SRC-20 tracks token supply and balances through compatible services.
+- Onchain names: SRC-101 gives names a distinct ownership and renewal lifecycle.
+- Shared history: Confirmed transactions form the timeline behind each experience.
 
-- The local nested SRC-101 checkout is at src-101-docs/ and is published independently at https://bitcoinuniverse.github.io/src-101/.
-- SRC-101 is a distinct name and record protocol with deploy, mint, transfer, renew, and setrecord operations.
-- Its parser uses strict operation-specific field sets, deploy transaction hashes, base64-encoded token IDs, and lifecycle state.
-- Do not apply SRC-20 balance, tick, or OLGA framing guidance to SRC-101 unless the pinned target indexer explicitly requires it.
-- Read https://bitcoinuniverse.github.io/src-101/ and https://github.com/bitcoinuniverse/src-101 for SRC-101-specific rules.
+## User safety
 
-## Chronology
+Bitcoin confirms the transaction; compatible Stamps services interpret asset and name activity. Never share a seed phrase, never blind-sign, and always verify recipients, amounts, outputs, and fees.
 
-- Block 788041: first Counterparty-era SRC-20 token.
-- Block 793068: direct-Bitcoin SRC-20 begins.
-- Block 796000: Counterparty SRC-20 is no longer honored after this cutoff.
-- Block 865000: OLGA/P2WSH SRC-20 begins.
+## Community resources
 
-Do not call block 796000 the single direct-Bitcoin activation height.
-Do not describe legacy bare-multisig ARC4 transport as the current universal SRC-20 transport.
-
-## Canonical message profile for new builders
-
-Deploy:
-
-{"p":"src-20","op":"deploy","tick":"STAMP","max":"21000000","lim":"1000","dec":"0"}
-
-Mint:
-
-{"p":"src-20","op":"mint","tick":"STAMP","amt":"1000"}
-
-Transfer:
-
-{"p":"src-20","op":"transfer","tick":"STAMP","amt":"250"}
-
-- Required all operations: p, op, tick.
-- Deploy also requires max and lim. dec is optional and defaults to 18.
-- Mint and transfer also require amt.
-- Emit lowercase p and op, compact UTF-8 JSON, quoted decimal strings, no exponent notation, and only intended fields.
-- Use one to five ASCII alphanumeric tick characters for broad compatibility. Exact non-ASCII support is target-indexer specific.
-- max and lim should be positive whole decimal strings, not more than uint64 maximum 18446744073709551615.
-- amt should be a positive plain decimal string within the token's dec precision and uint64 bounds.
-- Historical parser quirks, such as extra fields or fractional max/lim coercion, are not a portable wire format.
-
-## Transaction semantics
-
-- The reference parser derives source/creator from the address of vin[0]'s spent output.
-- The reference parser derives destination/credited owner from vout[0].
-- JSON fields named from or to do not authorize or route SRC-20 behavior.
-- Transaction input and output ordering therefore matters.
-- For current OLGA/P2WSH SRC-20, the decoded payload is framed as 2-byte length, ASCII "stamp:", then UTF-8 JSON. P2WSH chunks reconstruct the payload without legacy ARC4.
-- The legacy direct-Bitcoin multisig path uses ARC4 plus keyburn conventions. Keep it scoped to historical parsing.
-
-## State semantics
-
-- Ticks are case-insensitive identities. A duplicate deploy is invalid.
-- A mint must target an existing token. Its indexed credit is capped by requested amount, per-mint lim, and remaining max supply.
-- A mint after supply is fully exhausted is invalid.
-- A transfer above the indexer's running balance is invalid and changes neither address balance.
-- A structurally valid Stamp can still be an invalid SRC-20 state transition. Do not say that every invalid token operation has no Stamp record.
-- SRC-20 accounting is address-indexed, not a Bitcoin-native token UTXO ledger.
-
-## Universe profile
-
-- Universe currently builds an OLGA-style P2WSH payload profile.
-- Current builder data outputs are 32-byte P2WSH chunks with 330-sat values.
-- Current output order is recipient dust at vout[0], data outputs, configured service fee, then change.
-- Current local configuration uses a 1500-sat service fee per operation, separate from miner fee and dust.
-- Orders expire after one hour.
-- Bulk mint supports 1 through 10 independent mint transactions from a funding fan-out.
-- These are Universe product behaviors, not universal SRC-20 rules. Require target-indexer conformance evidence.
-
-## Safety
-
-- Never ask for a seed phrase or private key.
-- Never blind-sign a third-party PSBT.
-- Review all inputs, vout[0], data outputs, change, miner fee, and service-fee outputs before signing.
-- Record target indexer version, exact payload, txid, confirmation state, and post-indexing state for support.
-- Do not document draft SIPs as active features.
-
-## Local documents
-
-- index.html: overview
-- reference.html: protocol reference
-- guide.html: build and verification flow
-- universe.html: Universe construction profile
-- sources.html: source hierarchy and conflict policy
-- specification.md: detailed specification
-- universe-transaction-profile.md: local implementation details
-- api-reference.md: current REST contract
-- conformance-vectors.md: expected test cases
-- security.md: safety and trust boundaries
-- changelog.md: documentation history
+- Enter the Bitcoin Stamps ecosystem: https://stampchain.io/
+- Discover SRC-101: https://bitcoinuniverse.github.io/src-101/
