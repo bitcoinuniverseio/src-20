@@ -4,7 +4,7 @@
 
 Bitcoin Stamps transforms transaction data into lasting digital culture. SRC-20 brings fungible assets; SRC-101 adds names and records.
 
-Stamps, SRC-20 & SRC-101 is part of the growing Bitcoin Universe—an onchain landscape for creators, collectors, and communities who want their digital stories to last.
+Stamps, SRC-20 & SRC-101 is part of the growing Bitcoin Universe, an onchain landscape for creators, collectors, and communities who want their digital stories to last.
 
 ## Step inside
 
@@ -21,7 +21,7 @@ Stamps, SRC-20 & SRC-101 is part of the growing Bitcoin Universe—an onchain la
 
 ## A clear onchain promise
 
-Stamps gives creators and collectors a durable canvas. SRC-20 adds community tokens and SRC-101 adds names—each with a distinct lifecycle interpreted by compatible Stamps services.
+Stamps gives creators and collectors a durable canvas. SRC-20 adds community tokens and SRC-101 adds names, each with a distinct lifecycle interpreted by compatible Stamps services.
 
 ## Stay in control
 
