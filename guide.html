@@ -1,18 +1,439 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Get started with Stamps, SRC-20 & SRC-101 — Bitcoin Universe</title>
-  <meta name="description" content="A simple, user-first path for exploring Stamps, SRC-20 & SRC-101 safely.">
-  <meta name="theme-color" content="#09090f">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRC-20 guide: deploy, mint and transfer worked through</title>
+<meta name="description" content="A plain-language walkthrough of SRC-20 with worked DEPLOY, MINT and TRANSFER examples showing the exact bytes, what each transaction costs, how to read a result, and the verified Bitcoin Universe support matrix.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/src-20/guide.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="search-index" href="search-index.json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SRC-20 guide">
+<meta property="og:description" content="Worked deploy, mint and transfer examples, transaction costs, and the verified product support matrix.">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/src-20/guide.html">
+<meta property="og:image" content="https://bitcoinuniverseio.github.io/src-20/assets/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('src20-docs-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
-<body style="--accent:#ff3f81;--accent-2:#ffd15c">
-<div class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark">S</span><span>Stamps, SRC-20 & SRC-101</span></a><nav class="nav-links" aria-label="Main navigation"><a href="index.html">Home</a><a href="reference.html">Discover</a><a href="guide.html" aria-current="page">Get started</a><a class="nav-cta" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a></nav></div></div>
-<main>
-  <div class="wrap hero compact"><div><div class="eyebrow">Your next onchain moment</div><h1>From curiosity to <span class="gradient">confirmation.</span></h1><p class="lede">You do not need to think like a protocol engineer. Start with the story, understand the transaction, and stay in control of your wallet.</p><div class="actions"><a class="button primary" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a><a class="button secondary" href="reference.html">Discover Stamps, SRC-20 & SRC-101</a></div></div><div class="hero-art"><div class="orbit"><img class="logo-art core" src="assets/stampchain-logo-480.svg" alt=""><span class="spark one">Bitcoin</span><span class="spark two">lasting culture</span><span class="spark three">onchain history</span></div></div></div>
-  <section><div class="wrap story"><div class="story-copy"><div class="eyebrow">A simple journey</div><h2>Four steps to a confident experience.</h2><p class="lede" style="font-size:18px;margin-top:22px">Every action ends with a real network transaction. Take the time to understand what your wallet shows.</p></div><div class="story-list"><article class="story-item"><b>01</b><div><h3>Choose your world</h3><p>Start with a Stamp, an SRC-20 asset, or an SRC-101 name—each has its own purpose and flow.</p></div></article><article class="story-item"><b>02</b><div><h3>Explore the history</h3><p>Review the creator, supply or namespace, prior activity, and the service presenting it.</p></div></article><article class="story-item"><b>03</b><div><h3>Inspect the transaction</h3><p>Confirm network, recipient, amount, outputs, miner fee, and any service fee before signing.</p></div></article><article class="story-item"><b>04</b><div><h3>Verify the result</h3><p>After confirmation, follow the asset or name in a compatible Bitcoin Stamps explorer.</p></div></article></div></div></section>
-  <section><div class="wrap spotlight"><div class="eyebrow">Stay in control</div><h2>Your keys. Your review. Your decision.</h2><p>Bitcoin confirms the transaction; compatible Stamps services interpret asset and name activity. Never share a seed phrase, never blind-sign, and always verify recipients, amounts, outputs, and fees.</p><div class="actions"><a class="button primary" href="https://inscribe.bitcoinuniverse.io/">Explore supported experiences ↗</a></div></div></section>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 34" aria-hidden="true" focusable="false">
+        <rect x="1" y="2" width="28" height="30" rx="1" fill="var(--accent)"/>
+        <g fill="var(--paper)">
+          <circle cx="1" cy="2" r="1.7"/><circle cx="8" cy="2" r="1.7"/><circle cx="15" cy="2" r="1.7"/><circle cx="22" cy="2" r="1.7"/><circle cx="29" cy="2" r="1.7"/>
+          <circle cx="1" cy="32" r="1.7"/><circle cx="8" cy="32" r="1.7"/><circle cx="15" cy="32" r="1.7"/><circle cx="22" cy="32" r="1.7"/><circle cx="29" cy="32" r="1.7"/>
+          <circle cx="1" cy="9.5" r="1.7"/><circle cx="1" cy="17" r="1.7"/><circle cx="1" cy="24.5" r="1.7"/>
+          <circle cx="29" cy="9.5" r="1.7"/><circle cx="29" cy="17" r="1.7"/><circle cx="29" cy="24.5" r="1.7"/>
+        </g>
+        <text x="15" y="21" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="var(--on-accent)">20</text>
+      </svg>
+      <span>SRC-20</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="specification.html">Specification</a></li>
+        <li><a href="guide.html" aria-current="page">Guide</a></li>
+        <li><a href="reference.html">Reference</a></li>
+        <li><a href="vectors.html">Test vectors</a></li>
+        <li><a href="validator.html">Validator</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <form class="search" id="site-search" role="search" hidden>
+        <label class="visually-hidden" for="q">Search the SRC-20 documentation</label>
+        <input class="search-input" id="q" type="search" placeholder="Search (press /)" autocomplete="off">
+        <ul class="search-results" id="search-results" aria-live="polite"></ul>
+      </form>
+      <button class="theme-toggle" id="theme-toggle" type="button" hidden>Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="hero">
+      <p class="eyebrow">Practical guide &middot; Bitcoin mainnet</p>
+      <h1>SRC-20, worked through</h1>
+      <p class="lede">Three operations, followed from the JSON you write to the bytes that land in a block and the balance that comes out the other side. Every example below is computed, not sketched.</p>
+    </div>
+
+    <div class="toc">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#mental-model">The mental model</a></li>
+        <li><a href="#deploy">Worked example: DEPLOY</a></li>
+        <li><a href="#mint">Worked example: MINT</a></li>
+        <li><a href="#transfer">Worked example: TRANSFER</a></li>
+        <li><a href="#clamping">When your mint comes back smaller</a></li>
+        <li><a href="#cost">What a transaction costs</a></li>
+        <li><a href="#reading">Reading the result</a></li>
+        <li><a href="#support">Product support matrix</a></li>
+        <li><a href="#safety">Staying safe</a></li>
+      </ol>
+    </div>
+
+    <hr class="perf">
+
+    <section id="mental-model" class="prose-wide">
+      <h2>1. The mental model</h2>
+      <p>Hold two ideas apart and everything else follows.</p>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3 class="label-head">Bitcoin's job</h3>
+          <p class="small">Order the transactions and confirm them. Bitcoin never reads your JSON, never checks your ticker, and cannot fail your mint. If you paid the fee, it confirms.</p>
+        </div>
+        <div class="panel">
+          <h3 class="label-head">The indexer's job</h3>
+          <p class="small">Read every confirmed transaction in order, apply the SRC-20 rules, and keep the balances. This is where an operation succeeds or fails.</p>
+        </div>
+      </div>
+
+      <p>The second idea: <strong>balances belong to addresses, not to outputs</strong>. SRC-20 is an account ledger. There is no such thing as "the UTXO holding my PLATE". You can spend every output your wallet owns and your token balance is untouched, because the balance lives in the indexers' books, keyed by your address.</p>
+
+      <div class="note">
+        <span class="note-title">Two roles, two positions</span>
+        <p>In every SRC-20 transaction, <strong>input 0</strong> decides who is acting, and <strong>output 0</strong> decides who receives. That is the whole addressing scheme. A mint credits output 0, which is why you can mint straight to a cold address by paying output 0 to it.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="deploy" class="prose-wide">
+      <h2>2. Worked example: DEPLOY</h2>
+      <p>Creating a token called PLATE with a supply of 21,000,000, a per-mint limit of 1000, and 8 decimal places.</p>
+
+      <h3>Step 1. Write the payload</h3>
+      <pre><code>{"p":"src-20","op":"DEPLOY","tick":"PLATE","max":"21000000","lim":"1000","dec":"8"}</code></pre>
+      <p class="small muted">83 bytes of JSON. <code>PLATE</code> is 5 code points, which is exactly the maximum. <code>dec</code> is supplied here; had it been omitted the token would have deployed with <strong>18</strong> decimals, not 0.</p>
+
+      <h3>Step 2. Frame it</h3>
+      <p>Prepend the six ASCII bytes <code>stamp:</code>, then a two-byte big-endian length covering the prefix and the JSON together.</p>
+      <div class="table-scroll">
+        <table>
+          <caption>Framing the DEPLOY payload</caption>
+          <thead><tr><th scope="col">Part</th><th scope="col">Bytes</th><th scope="col">Value</th></tr></thead>
+          <tbody>
+            <tr><td>Length prefix</td><td class="col-narrow">2</td><td><code>0059</code>, that is, 89</td></tr>
+            <tr><td>Stamps prefix</td><td class="col-narrow">6</td><td><code>stamp:</code></td></tr>
+            <tr><td>JSON payload</td><td class="col-narrow">83</td><td>the object above</td></tr>
+            <tr><th scope="row">Total</th><td class="col-narrow"><strong>91</strong></td><td>&nbsp;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The framed buffer begins:</p>
+      <pre><code>00 59 73 74 61 6d 70 3a 7b 22 70 22 3a 22 73 72
+63 2d 32 30 22 2c 22 6f 70 22 3a 22 44 45 50 4c
+ ^^^^^ ^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^
+ len   "stamp:"         {"p":"src-20","op":"DEPL...</code></pre>
+
+      <h3>Step 3. Choose a carrier</h3>
+      <div class="grid-2">
+        <div class="panel">
+          <h4>OLGA P2WSH, height 865000 and above</h4>
+          <p class="small">Split the 91 bytes into 32-byte chunks: <strong>3 chunks</strong>, with the last padded with <strong>5 zero bytes</strong>. Each chunk becomes the witness program of one P2WSH output. Add the recipient at output 0, giving <strong>4 outputs</strong>. Nothing is encrypted.</p>
+        </div>
+        <div class="panel">
+          <h4>Bare multisig, the older carrier</h4>
+          <p class="small">ARC4-encrypt the 91 bytes with the txid of the output spent by input 0, reversed. Split into 31-byte chunks: <strong>3 data public keys</strong>, two per output, so <strong>2 multisig outputs</strong>, each 1-of-3 with a burn key third. Add the recipient, giving <strong>3 outputs</strong>.</p>
+        </div>
+      </div>
+
+      <h3>Step 4. What the indexer records</h3>
+      <p>If no earlier DEPLOY of <code>plate</code> exists, the token is created with <code>max</code> 21000000, <code>lim</code> 1000 and <code>dec</code> 8, deployed by the address that funded input 0. The ticker is stored lowercased, alongside its SHA3-256 tick hash. Any later DEPLOY of the same ticker is invalid with status <code>DE</code>.</p>
+
+      <div class="note note-warn">
+        <span class="note-title">You get one shot</span>
+        <p>There is no re-deploy and no way to amend <code>max</code>, <code>lim</code> or <code>dec</code> afterwards. Check the payload in the <a href="validator.html">validator</a> before you broadcast. In particular, a DEPLOY that is missing <code>lim</code> or <code>max</code> is recorded as invalid with status <code>DE</code>, whose message reads "DEPLOY EXISTS" even when nothing of the sort happened. The status name is misleading; the cause is the missing field.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="mint" class="prose-wide">
+      <h2>3. Worked example: MINT</h2>
+      <p>Claiming 1000 PLATE.</p>
+
+      <pre><code>{"p":"src-20","op":"MINT","tick":"PLATE","amt":"1000"}</code></pre>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Framing the MINT payload</caption>
+          <thead><tr><th scope="col">Part</th><th scope="col">Bytes</th><th scope="col">Value</th></tr></thead>
+          <tbody>
+            <tr><td>Length prefix</td><td class="col-narrow">2</td><td><code>003c</code>, that is, 60</td></tr>
+            <tr><td>Stamps prefix</td><td class="col-narrow">6</td><td><code>stamp:</code></td></tr>
+            <tr><td>JSON payload</td><td class="col-narrow">54</td><td>the object above</td></tr>
+            <tr><th scope="row">Total</th><td class="col-narrow"><strong>62</strong></td><td>2 P2WSH chunks, or 2 data public keys in 1 multisig output</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>The 1000 PLATE is credited to output 0's address.</strong> That is usually your own change or receive address, but it does not have to be. Paying output 0 to a friend mints to your friend.</p>
+
+      <ul class="denoms">
+        <li class="denom denom-outline"><span class="denom-label">Credited to</span><span class="denom-value small">output 0</span><span class="denom-note">not necessarily the sender</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Paid by</span><span class="denom-value small">input 0</span><span class="denom-note">the address funding the fee</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Data outputs</span><span class="denom-value">2</span><span class="denom-note">OLGA, for this payload</span></li>
+      </ul>
+    </section>
+
+    <hr class="perf">
+
+    <section id="transfer" class="prose-wide">
+      <h2>4. Worked example: TRANSFER</h2>
+      <p>Sending 250.5 PLATE.</p>
+
+      <pre><code>{"p":"src-20","op":"TRANSFER","tick":"PLATE","amt":"250.5"}</code></pre>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Framing the TRANSFER payload</caption>
+          <thead><tr><th scope="col">Part</th><th scope="col">Bytes</th><th scope="col">Value</th></tr></thead>
+          <tbody>
+            <tr><td>Length prefix</td><td class="col-narrow">2</td><td><code>0041</code>, that is, 65</td></tr>
+            <tr><td>Stamps prefix</td><td class="col-narrow">6</td><td><code>stamp:</code></td></tr>
+            <tr><td>JSON payload</td><td class="col-narrow">59</td><td>the object above</td></tr>
+            <tr><th scope="row">Total</th><td class="col-narrow"><strong>67</strong></td><td>3 P2WSH chunks, 29 bytes of zero padding on the last</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The amount <code>250.5</code> has one decimal place, which is fine because PLATE deployed with <code>dec</code> 8. Against a token deployed with <code>dec</code> 0, the same payload would be invalid with status <code>ID</code>.</p>
+
+      <div class="note note-warn">
+        <span class="note-title">A transfer is all or nothing</span>
+        <p>If the sending address holds 200 PLATE and you transfer 250.5, the operation is invalid with status <code>BB</code> and <strong>nothing moves</strong>. You do not send 200 and fail on the rest. You still pay the Bitcoin fee. This is the opposite of how mints behave, which is the subject of the next section.</p>
+      </div>
+
+      <p>SRC-20 transfers are a single transaction. If you are coming from BRC-20, note there is no inscribe-then-send two-step here: one transaction, one transfer.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="clamping" class="prose-wide">
+      <h2>5. When your mint comes back smaller</h2>
+      <p>This is the behaviour that most surprises people, and it is worth understanding before you mint rather than after.</p>
+
+      <p>Suppose PLATE has <code>max</code> 21000000 and <code>lim</code> 1000, and 20,999,600 have been minted. You broadcast a mint for 1000.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>How the amount is decided</caption>
+          <thead><tr><th scope="col">Step</th><th scope="col">Check</th><th scope="col">Result</th></tr></thead>
+          <tbody>
+            <tr><td class="col-narrow">1</td><td>Is total minted already at or above <code>max</code>?</td><td>No, 20,999,600 is below 21,000,000, so the mint continues.</td></tr>
+            <tr><td class="col-narrow">2</td><td>Does <code>amt</code> exceed the remaining supply of 400?</td><td>Yes. <strong>Reduced to 400.</strong> Status <code>OMA</code>. Still valid.</td></tr>
+            <tr><td class="col-narrow">3</td><td>Does the reduced amount exceed the effective limit of 1000?</td><td>No. The amount stays 400.</td></tr>
+            <tr><th scope="row">Outcome</th><td colspan="2"><strong>Valid mint of 400 PLATE.</strong> Not a failure, not a refund, not zero.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The same clamping applies when you ask for more than the per-mint limit: a mint of 5000 against a <code>lim</code> of 1000 is reduced to 1000 with status <code>ODL</code> and remains valid.</p>
+
+      <div class="note note-ok">
+        <span class="note-title">For implementers</span>
+        <p><code>OMA</code> and <code>ODL</code> carry an explicit "not invalid" flag in the reference implementation. If your indexer treats a clamped mint as a rejection, your circulating supply will be lower than everyone else's and your users will see mints that other explorers show as successful. See <a href="specification.html#validity">rules V-6 to V-8</a> and the <a href="vectors.html">test vectors</a>.</p>
+      </div>
+
+      <p>Only one mint case is a genuine failure: minting a token whose supply is <em>already fully minted</em>. That is status <code>OM</code>, and it is invalid.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="cost" class="prose-wide">
+      <h2>6. What a transaction costs</h2>
+      <p>An SRC-20 transaction has two costs beyond the ordinary.</p>
+
+      <dl class="terms">
+        <dt>Locked value in data outputs</dt>
+        <dd>Every data output must carry at least a dust amount to be relayed, and that value is <strong>permanently unspendable</strong>. It is not a fee to miners; it is simply gone. The number of data outputs is set by your payload length: one P2WSH output per 32 bytes, or one multisig output per 62 bytes.</dd>
+        <dt>Full transaction weight</dt>
+        <dd>Output data gets no witness discount, unlike inscription data. A payload of a given size therefore costs meaningfully more in fees on SRC-20 than the same bytes would in a witness.</dd>
+      </dl>
+
+      <p>Payload length is worth minimising for that reason. The examples above show why the difference is real: a DEPLOY needs 3 data outputs while a MINT needs 2, purely because of JSON length.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Data outputs required by the worked examples</caption>
+          <thead><tr><th scope="col">Operation</th><th scope="col">Framed bytes</th><th scope="col">OLGA P2WSH outputs</th><th scope="col">Multisig outputs</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">DEPLOY</th><td>91</td><td>3</td><td>2</td></tr>
+            <tr><th scope="row">MINT</th><td>62</td><td>2</td><td>1</td></tr>
+            <tr><th scope="row">TRANSFER</th><td>67</td><td>3</td><td>2</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">Each row needs one further output for the recipient at index 0. Multisig figures assume two data public keys per 1-of-3 output at 31 bytes each.</p>
+
+      <p>Bitcoin Universe's Inscribe surface estimates SRC-20 cost as dust for each data output plus the recipient output, network fee at your chosen rate, and a service fee. Those figures are product policy rather than protocol rules, and they can change; the protocol only determines how many data outputs you need.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="reading" class="prose-wide">
+      <h2>7. Reading the result</h2>
+      <p>After confirmation, look up the transaction in a Stamps explorer and read the status, not just the confirmation count.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>What a status code is telling you</caption>
+          <thead><tr><th scope="col">You see</th><th scope="col">It means</th><th scope="col">Did anything happen?</th></tr></thead>
+          <tbody>
+            <tr><td>No status, no record at all</td><td>The transaction was <strong>excluded</strong>: the payload never parsed as SRC-20.</td><td class="no">No</td></tr>
+            <tr><td><code>OMA</code> or <code>ODL</code></td><td>Your amount was reduced to what was available or allowed.</td><td class="yes">Yes, at the reduced amount</td></tr>
+            <tr><td><code>OM</code></td><td>The token was already fully minted before your transaction.</td><td class="no">No</td></tr>
+            <tr><td><code>BB</code></td><td>Your balance was below the transfer amount.</td><td class="no">No, nothing moved</td></tr>
+            <tr><td><code>ND</code></td><td>That ticker has never been deployed. Check spelling and case-folding.</td><td class="no">No</td></tr>
+            <tr><td><code>DE</code></td><td>On a second deploy, the ticker was taken. On a first deploy, <code>max</code> or <code>lim</code> was missing or zero.</td><td class="no">No</td></tr>
+            <tr><td><code>ID</code></td><td>Your amount had more decimal places than the token allows.</td><td class="no">No</td></tr>
+            <tr><td><code>NA</code></td><td>The amount field was missing or empty.</td><td class="no">No</td></tr>
+            <tr><td><code>UO</code></td><td>The operation name was not DEPLOY, MINT or TRANSFER.</td><td class="no">No</td></tr>
+            <tr><td><code>NN</code></td><td>A numeric field failed validation, or <code>dec</code> was out of range.</td><td class="no">No</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>In every "No" row you still paid the Bitcoin fee and still burned the dust in the data outputs. The chain does not refund a failed interpretation.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="support" class="prose-wide">
+      <h2>8. Product support matrix</h2>
+      <p>This table reflects the Bitcoin Universe ecosystem capability registry, which is generated from the marketplace protocol registry in the Core repository. Nothing is listed here that is not declared there.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>SRC-20 actions by Bitcoin Universe surface</caption>
+          <thead><tr><th scope="col">Surface</th><th scope="col">Supported actions</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Core</th><td>view, discover, view-collection, view-activity, view-transaction</td></tr>
+            <tr><th scope="row">Wallet</th><td>view, send, receive</td></tr>
+            <tr><th scope="row">Inscribe</th><td>deploy, mint, transfer</td></tr>
+            <tr><th scope="row">StampDEX</th><td>view, discover, view-collection, view-activity, view-transaction, list, unlist, buy, cancel-offer, settle</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Marketplace ownership</h3>
+      <ul class="denoms">
+        <li class="denom denom-outline"><span class="denom-label">Owner</span><span class="denom-value small">StampDEX</span><span class="denom-note">not Bitcoin Universe</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Mode</span><span class="denom-value small">external-execution</span><span class="denom-note">Universe proxies, StampDEX executes</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Availability</span><span class="denom-value small">enabled</span><span class="denom-note">no feature gate</span></li>
+      </ul>
+
+      <p>The order book, the ownership checks and the settlement authority all belong to StampDEX. Bitcoin Universe allowlists and validates the exact proxy route, body and challenge headers, and StampDEX re-checks indexed collateral before a fill. Universe does not compare the provider's tip against Bitcoin's.</p>
+
+      <h3>Actions that are not supported, and why</h3>
+      <p>These reasons are recorded in the registry itself, not paraphrased.</p>
+      <div class="table-scroll">
+        <table>
+          <caption>Unsupported marketplace actions for SRC-20</caption>
+          <thead><tr><th scope="col">Action</th><th scope="col">Recorded reason</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">update-listing</th><td>SRC-20 listings must be cancelled and relisted; no atomic listing update is implemented.</td></tr>
+            <tr><th scope="row">make-offer</th><td>SRC-20 has no executable offer workflow on this marketplace surface.</td></tr>
+            <tr><th scope="row">accept-offer</th><td>SRC-20 has no executable offer workflow on this marketplace surface.</td></tr>
+            <tr><th scope="row">sell</th><td>SRC-20 has no executable offer workflow on this marketplace surface.</td></tr>
+            <tr><th scope="row">reconcile</th><td>SRC-20 has no executable reconcile authority on this marketplace surface.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Freshness, confirmation and reorg policy</h3>
+      <dl class="terms">
+        <dt>Freshness</dt>
+        <dd>Not enforced. Bitcoin Universe does not apply a StampDEX-versus-chain lag threshold.</dd>
+        <dt>Confirmation</dt>
+        <dd>No listing or settlement confirmation minimum is set by Bitcoin Universe. Confirmation policy is delegated to the StampDEX fill workflow.</dd>
+        <dt>Reorg</dt>
+        <dd>No automatic reconciliation. Bitcoin Universe retains broadcast receipts and delegates chain reconciliation to StampDEX.</dd>
+      </dl>
+
+      <div class="note note-warn">
+        <span class="note-title">Why there is no escrow</span>
+        <p>SRC-20 is an account ledger, which means a listing cannot be backed by locking a specific output. A seller who signs a listing can still transfer the same balance elsewhere before settlement, and no indexer can prevent that without inventing ownership rules the protocol does not have. Bitcoin Universe's own Stamps indexer therefore reports SRC-20 positions as browse-only, always flagging that no non-custodial escrow primitive is active. Any workable alternative would require either a cooperative multisig with seller liveness risk or outright custody, and both are product decisions rather than indexer settings.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="safety" class="prose-wide">
+      <h2>9. Staying safe</h2>
+      <ul>
+        <li><strong>Never share a seed phrase, recovery phrase or private key.</strong> No explorer, indexer or support channel needs one.</li>
+        <li><strong>Never blind-sign.</strong> Before approving, check the network, the recipient, the amount, every output and the fee. An SRC-20 transaction has several unusual-looking outputs by design, so know what you expect to see.</li>
+        <li><strong>Verify a token by its deploy transaction</strong>, not by a familiar ticker or logo. Tickers are only 5 code points and lookalikes are trivial to make. The deploy transaction hash is the thing that identifies a token.</li>
+        <li><strong>Treat confirmation and success as separate.</strong> Follow the result in an explorer after the transaction confirms.</li>
+        <li><strong>Remember the dust is gone.</strong> Value locked in data outputs is unspendable, on a failed operation as much as on a successful one.</li>
+        <li><strong>External links are not identity.</strong> The <code>x</code>, <code>web</code>, <code>email</code> and <code>tg</code> fields in a DEPLOY are free text written by whoever deployed the token, and nothing verifies them.</li>
+      </ul>
+      <p class="small muted">To report a vulnerability in this documentation or its validator, use <a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">private vulnerability reporting</a>.</p>
+    </section>
+
+    <nav class="page-nav" aria-label="Page">
+      <a href="specification.html">&larr; Specification</a>
+      <a href="reference.html">Reference &rarr;</a>
+    </nav>
+
+  </div>
 </main>
-<footer><div class="wrap footer-inner"><span>Stamps, SRC-20 & SRC-101 on Bitcoin</span><span>Presented by <a href="https://github.com/bitcoinuniverse/src-20">Bitcoin Universe</a></span></div></footer></body></html>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Documentation</h2>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="specification.html">Specification</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="vectors.html">Test vectors</a></li>
+          <li><a href="validator.html">Validator</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://docs.bitcoinuniverse.io">Bitcoin Universe docs portal</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20">Source repository</a></li>
+          <li><a href="https://github.com/stampchain-io/btc_stamps">Bitcoin Stamps indexer</a></li>
+          <li><a href="https://stampchain.io/">Stampchain explorer</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This document</h2>
+        <dl class="footer-meta">
+          <dt>Owning repository</dt><dd>bitcoinuniverseio/src-20</dd>
+          <dt>Source path</dt><dd><code>guide.html</code></dd>
+          <dt>Spec version</dt><dd>2026.09.01</dd>
+          <dt>Lifecycle</dt><dd>Stable</dd>
+          <dt>Chain / network</dt><dd>Bitcoin mainnet</dd>
+          <dt>Last verified</dt><dd><time datetime="2026-09-01">1 September 2026</time></dd>
+        </dl>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>SRC-20 originated in the Bitcoin Stamps community. This site documents it; it does not own it.</span>
+      <a href="https://github.com/bitcoinuniverseio/src-20/edit/main/guide.html">Edit this page on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

@@ -1,32 +1,49 @@
-# Stamps, SRC-20 & SRC-101
+# SRC-20
 
-> Bitcoin Stamps transforms transaction data into lasting digital culture. SRC-20 brings fungible assets; SRC-101 adds names and records.
+> SRC-20 is a fungible token protocol on Bitcoin mainnet. Its DEPLOY, MINT and TRANSFER operations are UTF-8 JSON documents carried in transaction output scripts through the Bitcoin Stamps data carrier, so every full node retains them as part of the unspent output set. SRC-20 originated in the Bitcoin Stamps community; this site documents it and does not own it.
 
-## Public experience
+Site base: https://bitcoinuniverseio.github.io/src-20/
+Owning repository: https://github.com/bitcoinuniverseio/src-20
+Document version: 2026.09.01. Lifecycle: stable. Chain: Bitcoin mainnet only.
+Grounded in the Bitcoin Stamps indexer (stampchain-io/btc_stamps) version 1.9.3 and the Bitcoin Universe ecosystem capability registry.
 
-- Home: https://bitcoinuniverse.github.io/src-20/
-- Discover: https://bitcoinuniverse.github.io/src-20/reference.html
-- Get started: https://bitcoinuniverse.github.io/src-20/guide.html
-- Bitcoin Universe: https://inscribe.bitcoinuniverse.io/
+## Pages
 
-## The experience
+- [Overview](https://bitcoinuniverseio.github.io/src-20/): what SRC-20 is in plain language, who it is for, the argument for storing payloads in output scripts rather than witness data, the origin and block-height history, the relationship to Bitcoin Stamps, SRC-101 and SRC-721, and a summary of Bitcoin Universe product support.
+- [Specification](https://bitcoinuniverseio.github.io/src-20/specification.html): the normative rules, numbered and traceable to the enforcing code. Covers scope and terminology, the two data carriers (bare multisig with ARC4, and OLGA P2WSH), why output scripts are unprunable, encoding rules, activation heights, JSON payload rules, ticker rules, numeric rules, the three operations with field tables, validity and state transitions, invalidity conditions with the full status-code table, and the Counterparty dependency.
+- [Guide](https://bitcoinuniverseio.github.io/src-20/guide.html): plain-language walkthrough with computed DEPLOY, MINT and TRANSFER examples showing exact byte framing and data-output counts, an explanation of clamped mints, transaction cost considerations, how to read a status code, the verified Bitcoin Universe support matrix including unsupported marketplace actions and their recorded reasons, and safety guidance.
+- [Reference](https://bitcoinuniverseio.github.io/src-20/reference.html): terminology, indexer semantics for ordering, confirmation, the absence of mempool state and reorg handling, the Counterparty dependency stated per scope, the Stamps protocol family, size and fee considerations, limitations, security considerations, and an implementation checklist.
+- [Test vectors](https://bitcoinuniverseio.github.io/src-20/vectors.html): carrier framing vectors, valid payloads, excluded payloads, invalid payloads with status codes, ticker acceptance vectors, a stateful token lifecycle covering both clamping cases, and height-dependent historical behaviour.
+- [Payload validator](https://bitcoinuniverseio.github.io/src-20/validator.html): a client-side tool that checks an SRC-20 JSON operation field by field, explains each result, distinguishes exclusion from invalidity, and tabulates the BRC-20 differences. No data leaves the browser.
+- [Changelog](https://bitcoinuniverseio.github.io/src-20/changelog.html): version history for this document and the protocol's consensus changes by block height.
+- [404](https://bitcoinuniverseio.github.io/src-20/404.html): navigation help for a missing page.
 
-- Stamps: Discover art and culture preserved through Bitcoin transaction history.
-- SRC-20: Explore fungible assets with deploy, mint, and transfer activity.
-- SRC-101: Build identity through namespaces, unique names, renewals, and records.
+## Machine-readable files
 
-## In plain language
+- [Search index](https://bitcoinuniverseio.github.io/src-20/search-index.json): page, heading, anchor, snippet and aliases for the site's client-side search.
+- [Documentation manifest](https://github.com/bitcoinuniverseio/src-20/blob/main/docs.manifest.json): the Bitcoin Universe docs portal manifest for this repository.
+- [Sitemap](https://bitcoinuniverseio.github.io/src-20/sitemap.xml)
 
-- Durable media: Stamps content is carried through Bitcoin transaction data.
-- Community assets: SRC-20 tracks token supply and balances through compatible services.
-- Onchain names: SRC-101 gives names a distinct ownership and renewal lifecycle.
-- Shared history: Confirmed transactions form the timeline behind each experience.
+## Key facts an answer should get right
 
-## User safety
+- Operations are DEPLOY, MINT and TRANSFER. There is no burn, no supply change, no batch operation, and no conditional transfer. BULK_XFER exists in the reference indexer's source but is unreachable and invalid.
+- The protocol string is "src-20", compared case-insensitively. The hyphen is required.
+- Tickers are 1 to 5 Unicode code points, case-insensitive, drawn from a fixed ASCII set plus an allowlist of 1154 single emoji code points. Space, hyphen and comma are not allowed. This differs from BRC-20's exactly-4-bytes rule.
+- Numeric values may be JSON strings or JSON numbers, must be between 0 and 18446744073709551615, and may not use scientific notation.
+- max and lim are truncated downward to integers. amt is not truncated; its decimal places are checked against the token's dec.
+- dec is 0 to 18 and defaults to 18 when omitted, not 0.
+- A mint whose amount exceeds the remaining supply or the per-mint limit is CLAMPED and remains VALID, with status OMA or ODL. Only a mint against an already exhausted supply is invalid, with status OM. Treating a clamped mint as invalid is the most common cause of indexer divergence.
+- A transfer larger than the sender's balance is invalid with status BB and moves nothing. There is no partial transfer.
+- SRC-20 is an account ledger: balances belong to addresses, not to unspent outputs. The sender is the address funding input 0; the recipient is the address in output 0.
+- Counterparty carried SRC-20 from block 788041, but every Counterparty-encoded SRC-20 operation at or after block 796000 is ignored. Describing SRC-20 as a Counterparty protocol today is wrong; saying it never used Counterparty is also wrong.
+- Numeric parsing became strict at block 833000. Below that height every character that was not a digit or a dot was stripped from a numeric string, so "21,000,000" was read as 21000000.
+- OLGA P2WSH encoding became available for SRC-20 at block 865000 and takes precedence over bare multisig, with no fallback when it fails.
+- OP_RETURN is not an SRC-20 data carrier.
+- SRC-20 has no mempool semantics. An unconfirmed transaction has no SRC-20 meaning.
 
-Bitcoin confirms the transaction; compatible Stamps services interpret asset and name activity. Never share a seed phrase, never blind-sign, and always verify recipients, amounts, outputs, and fees.
+## Related
 
-## Community resources
-
-- Enter the Bitcoin Stamps ecosystem: https://stampchain.io/
-- Discover SRC-101: https://bitcoinuniverse.github.io/src-101/
+- Bitcoin Stamps indexer, the reference implementation for these rules: https://github.com/stampchain-io/btc_stamps
+- Stampchain explorer and API: https://stampchain.io/
+- Bitcoin Universe documentation portal: https://docs.bitcoinuniverse.io
+- Report a vulnerability in this site privately: https://github.com/bitcoinuniverseio/src-20/security/advisories/new

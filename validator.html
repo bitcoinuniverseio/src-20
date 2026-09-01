@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRC-20 payload validator</title>
+<meta name="description" content="Paste an SRC-20 JSON operation and see every field check explained against the rules the Bitcoin Stamps indexer enforces, including the BRC-20 differences that commonly trip people up. Runs entirely in your browser.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/src-20/validator.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="search-index" href="search-index.json">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SRC-20 payload validator">
+<meta property="og:description" content="Check an SRC-20 JSON operation field by field, entirely in your browser.">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/src-20/validator.html">
+<meta property="og:image" content="https://bitcoinuniverseio.github.io/src-20/assets/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('src20-docs-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 34" aria-hidden="true" focusable="false">
+        <rect x="1" y="2" width="28" height="30" rx="1" fill="var(--accent)"/>
+        <g fill="var(--paper)">
+          <circle cx="1" cy="2" r="1.7"/><circle cx="8" cy="2" r="1.7"/><circle cx="15" cy="2" r="1.7"/><circle cx="22" cy="2" r="1.7"/><circle cx="29" cy="2" r="1.7"/>
+          <circle cx="1" cy="32" r="1.7"/><circle cx="8" cy="32" r="1.7"/><circle cx="15" cy="32" r="1.7"/><circle cx="22" cy="32" r="1.7"/><circle cx="29" cy="32" r="1.7"/>
+          <circle cx="1" cy="9.5" r="1.7"/><circle cx="1" cy="17" r="1.7"/><circle cx="1" cy="24.5" r="1.7"/>
+          <circle cx="29" cy="9.5" r="1.7"/><circle cx="29" cy="17" r="1.7"/><circle cx="29" cy="24.5" r="1.7"/>
+        </g>
+        <text x="15" y="21" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="var(--on-accent)">20</text>
+      </svg>
+      <span>SRC-20</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="specification.html">Specification</a></li>
+        <li><a href="guide.html">Guide</a></li>
+        <li><a href="reference.html">Reference</a></li>
+        <li><a href="vectors.html">Test vectors</a></li>
+        <li><a href="validator.html" aria-current="page">Validator</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <form class="search" id="site-search" role="search" hidden>
+        <label class="visually-hidden" for="q">Search the SRC-20 documentation</label>
+        <input class="search-input" id="q" type="search" placeholder="Search (press /)" autocomplete="off">
+        <ul class="search-results" id="search-results" aria-live="polite"></ul>
+      </form>
+      <button class="theme-toggle" id="theme-toggle" type="button" hidden>Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="hero">
+      <p class="eyebrow">Interactive tool &middot; Bitcoin mainnet &middot; Rules as of indexer 1.9.3</p>
+      <h1>SRC-20 payload validator</h1>
+      <p class="lede">Paste an SRC-20 JSON operation. Every field is checked against the rules the Bitcoin Stamps indexer enforces, and each result explains itself, including whether a failure means the transaction is <strong>excluded</strong> or merely <strong>recorded as invalid</strong>.</p>
+    </div>
+
+    <div class="note">
+      <span class="note-title">Nothing leaves your browser</span>
+      <p>This tool is a single static JavaScript file. There is no request, no logging, no storage and no analytics of any kind. You can read <a href="assets/validator.js"><code>assets/validator.js</code></a> and confirm it.</p>
+    </div>
+
+    <noscript>
+      <div class="note note-warn">
+        <span class="note-title">JavaScript required for this tool only</span>
+        <p>The validator needs JavaScript. Every other page on this site, including the full <a href="specification.html">specification</a> and the <a href="vectors.html">test vectors</a>, works without it.</p>
+      </div>
+    </noscript>
+
+    <div id="tool-noscript" class="note note-warn">
+      <span class="note-title">JavaScript required for this tool only</span>
+      <p>The validator needs JavaScript. Every other page on this site works without it.</p>
+    </div>
+
+    <section class="tool" id="tool-panel" hidden>
+      <div class="tool-grid">
+        <div>
+          <label for="payload">SRC-20 JSON operation</label>
+          <textarea id="payload" spellcheck="false" autocapitalize="off" autocorrect="off" aria-describedby="payload-help">{
+  "p": "src-20",
+  "op": "DEPLOY",
+  "tick": "PLATE",
+  "max": "21000000",
+  "lim": "1000",
+  "dec": "8"
+}</textarea>
+          <p id="payload-help" class="small muted">Paste the JSON payload only, not the raw transaction hex.</p>
+
+          <h2 class="visually-hidden">Examples</h2>
+          <p class="small muted" style="margin-bottom:.3rem">Load an example:</p>
+          <ul class="sample-row">
+            <li><button class="chip" type="button" data-sample="deploy">Valid DEPLOY</button></li>
+            <li><button class="chip" type="button" data-sample="mint">Valid MINT</button></li>
+            <li><button class="chip" type="button" data-sample="transfer">Valid TRANSFER</button></li>
+            <li><button class="chip" type="button" data-sample="brc20">BRC-20 by mistake</button></li>
+            <li><button class="chip" type="button" data-sample="commas">Thousands separators</button></li>
+            <li><button class="chip" type="button" data-sample="sci">Scientific notation</button></li>
+            <li><button class="chip" type="button" data-sample="longtick">Ticker too long</button></li>
+            <li><button class="chip" type="button" data-sample="fractional">Fractional max and lim</button></li>
+            <li><button class="chip" type="button" data-sample="bulk">BULK_XFER</button></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="visually-hidden">Result</h2>
+          <div class="verdict" id="verdict" role="status" aria-live="polite"></div>
+          <ul class="checks" id="checks"></ul>
+
+          <div id="notes-wrap" hidden>
+            <h3>What this tool cannot know</h3>
+            <p class="small muted">A payload can be perfectly well formed and still fail on chain. These checks need the ledger:</p>
+            <ul class="small" id="notes"></ul>
+          </div>
+
+          <p class="tool-meta">Protocol SRC-20 &middot; Bitcoin mainnet &middot; Field rules from <code>btc_stamps</code> 1.9.3 &middot; Strict numeric parsing, that is, the rules in force at or above block 833000.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="brc20">The BRC-20 differences that catch people out</h2>
+      <p>Both protocols use the field names <code>p</code>, <code>op</code>, <code>tick</code>, <code>max</code>, <code>lim</code>, <code>amt</code> and <code>dec</code>. That similarity is the problem: a payload copied from a BRC-20 guide looks right and behaves differently.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Field-level differences</caption>
+          <thead><tr><th scope="col">Topic</th><th scope="col">SRC-20</th><th scope="col">BRC-20</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Protocol string</th><td><code>src-20</code>, compared case-insensitively. The hyphen is required.</td><td><code>brc-20</code></td></tr>
+            <tr><th scope="row">Where the data lives</th><td>Transaction <strong>output scripts</strong>, which stay in the UTXO set.</td><td>Input <strong>witness data</strong>, under the witness discount.</td></tr>
+            <tr><th scope="row">Ticker length</th><td>1 to 5 Unicode code points.</td><td>Exactly 4 bytes.</td></tr>
+            <tr><th scope="row">Ticker character set</th><td>A fixed ASCII list plus 1154 allowlisted single emoji code points. No space, hyphen or comma.</td><td>Any 4-byte sequence, with wider implementation variation.</td></tr>
+            <tr><th scope="row">Numeric types</th><td>JSON string or JSON number, both accepted.</td><td>Strings expected by the common indexers.</td></tr>
+            <tr><th scope="row">Fractional <code>max</code> / <code>lim</code></th><td>Truncated down to an integer, then deployed.</td><td>Commonly rejected outright.</td></tr>
+            <tr><th scope="row">Over-limit mint</th><td><strong>Clamped and still valid.</strong> Statuses OMA and ODL are not failures.</td><td>Commonly rejected, though the last-mint clamp exists in some indexers.</td></tr>
+            <tr><th scope="row">Over-balance transfer</th><td>Invalid, nothing moves, no partial fill.</td><td>Also invalid. This one matches.</td></tr>
+            <tr><th scope="row">Transfer model</th><td>Direct: one transaction moves balance from sender to output 0.</td><td>Two steps: an inscribe-transfer, then a transfer of the inscription.</td></tr>
+            <tr><th scope="row">Who receives a mint</th><td>The address in <strong>output 0</strong>, which need not be the sender.</td><td>The inscription's owner.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note note-warn">
+        <span class="note-title">The single most costly misreading</span>
+        <p>Treating a clamped mint as a rejected mint. In SRC-20, when your <code>amt</code> is above the per-mint limit or above what remains of the supply, the amount is quietly reduced and <strong>the mint still succeeds</strong>. An indexer that rejects it will report a smaller circulating supply than every other indexer, and a wallet that reports it as failed will confuse its users. See <a href="specification.html#validity">rules V-6 and V-7</a>.</p>
+      </div>
+    </section>
+
+    <nav class="page-nav" aria-label="Page">
+      <a href="vectors.html">&larr; Test vectors</a>
+      <a href="reference.html">Reference &rarr;</a>
+    </nav>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Documentation</h2>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="specification.html">Specification</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="vectors.html">Test vectors</a></li>
+          <li><a href="validator.html">Validator</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://docs.bitcoinuniverse.io">Bitcoin Universe docs portal</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20">Source repository</a></li>
+          <li><a href="https://github.com/stampchain-io/btc_stamps">Bitcoin Stamps indexer</a></li>
+          <li><a href="https://stampchain.io/">Stampchain explorer</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This document</h2>
+        <dl class="footer-meta">
+          <dt>Owning repository</dt><dd>bitcoinuniverseio/src-20</dd>
+          <dt>Source path</dt><dd><code>validator.html</code></dd>
+          <dt>Spec version</dt><dd>2026.09.01</dd>
+          <dt>Lifecycle</dt><dd>Stable</dd>
+          <dt>Chain / network</dt><dd>Bitcoin mainnet</dd>
+          <dt>Last verified</dt><dd><time datetime="2026-09-01">1 September 2026</time></dd>
+        </dl>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>SRC-20 originated in the Bitcoin Stamps community. This site documents it; it does not own it.</span>
+      <a href="https://github.com/bitcoinuniverseio/src-20/edit/main/validator.html">Edit this page on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+<script src="assets/validator.js" defer></script>
+</body>
+</html>

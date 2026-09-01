@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bitcoinuniverseio.github.io/src-20/sitemap.xml

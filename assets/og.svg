@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-labelledby="ogt ogd">
+  <title id="ogt">SRC-20</title>
+  <desc id="ogd">A postage stamp motif with perforated edges, labelled SRC-20, over the words "fungible tokens in unprunable Bitcoin outputs".</desc>
+  <defs>
+    <clipPath id="perfClip">
+      <path d="M0 0h1200v630H0z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="#f7f2e7"/>
+
+  <!-- album paper tint -->
+  <circle cx="180" cy="90" r="260" fill="#efe8d8" opacity="0.55"/>
+  <circle cx="1040" cy="560" r="240" fill="#efe8d8" opacity="0.5"/>
+
+  <!-- the stamp -->
+  <g transform="translate(96 150)">
+    <rect x="0" y="0" width="300" height="330" rx="2" fill="#14386e"/>
+    <g fill="#f7f2e7">
+      <circle cx="0" cy="0" r="12"/><circle cx="50" cy="0" r="12"/><circle cx="100" cy="0" r="12"/><circle cx="150" cy="0" r="12"/><circle cx="200" cy="0" r="12"/><circle cx="250" cy="0" r="12"/><circle cx="300" cy="0" r="12"/>
+      <circle cx="0" cy="330" r="12"/><circle cx="50" cy="330" r="12"/><circle cx="100" cy="330" r="12"/><circle cx="150" cy="330" r="12"/><circle cx="200" cy="330" r="12"/><circle cx="250" cy="330" r="12"/><circle cx="300" cy="330" r="12"/>
+      <circle cx="0" cy="55" r="12"/><circle cx="0" cy="110" r="12"/><circle cx="0" cy="165" r="12"/><circle cx="0" cy="220" r="12"/><circle cx="0" cy="275" r="12"/>
+      <circle cx="300" cy="55" r="12"/><circle cx="300" cy="110" r="12"/><circle cx="300" cy="165" r="12"/><circle cx="300" cy="220" r="12"/><circle cx="300" cy="275" r="12"/>
+    </g>
+    <rect x="26" y="26" width="248" height="278" fill="none" stroke="#f7f2e7" stroke-width="2" opacity="0.45"/>
+    <text x="150" y="150" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="7" fill="#f7f2e7">SRC</text>
+    <text x="150" y="240" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="94" font-weight="700" fill="#f7f2e7">20</text>
+    <text x="150" y="282" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="17" letter-spacing="3" fill="#f7f2e7" opacity="0.85">BITCOIN</text>
+  </g>
+
+  <!-- cancellation arcs -->
+  <g stroke="#7a2618" fill="none" stroke-linecap="round" opacity="0.5">
+    <path d="M300 210 a150 150 0 0 1 0 260" stroke-width="7"/>
+    <path d="M320 190 a180 180 0 0 1 0 300" stroke-width="5"/>
+    <path d="M340 172 a208 208 0 0 1 0 336" stroke-width="3"/>
+  </g>
+
+  <!-- text block -->
+  <text x="470" y="212" font-family="Georgia, 'Times New Roman', serif" font-size="24" letter-spacing="5" fill="#7a2618">BITCOIN STAMPS</text>
+  <text x="470" y="292" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="700" fill="#1c1a15">SRC-20</text>
+  <text x="470" y="356" font-family="Georgia, 'Times New Roman', serif" font-size="31" fill="#4f4a3d">Fungible tokens carried in</text>
+  <text x="470" y="398" font-family="Georgia, 'Times New Roman', serif" font-size="31" fill="#4f4a3d">unprunable Bitcoin outputs.</text>
+
+  <!-- perforated rule -->
+  <g fill="#cfc4a9">
+    <circle cx="470" cy="440" r="4"/><circle cx="492" cy="440" r="4"/><circle cx="514" cy="440" r="4"/><circle cx="536" cy="440" r="4"/><circle cx="558" cy="440" r="4"/><circle cx="580" cy="440" r="4"/><circle cx="602" cy="440" r="4"/><circle cx="624" cy="440" r="4"/><circle cx="646" cy="440" r="4"/><circle cx="668" cy="440" r="4"/><circle cx="690" cy="440" r="4"/><circle cx="712" cy="440" r="4"/><circle cx="734" cy="440" r="4"/><circle cx="756" cy="440" r="4"/><circle cx="778" cy="440" r="4"/><circle cx="800" cy="440" r="4"/><circle cx="822" cy="440" r="4"/><circle cx="844" cy="440" r="4"/><circle cx="866" cy="440" r="4"/><circle cx="888" cy="440" r="4"/><circle cx="910" cy="440" r="4"/><circle cx="932" cy="440" r="4"/><circle cx="954" cy="440" r="4"/><circle cx="976" cy="440" r="4"/><circle cx="998" cy="440" r="4"/><circle cx="1020" cy="440" r="4"/><circle cx="1042" cy="440" r="4"/><circle cx="1064" cy="440" r="4"/><circle cx="1086" cy="440" r="4"/><circle cx="1108" cy="440" r="4"/>
+  </g>
+
+  <text x="470" y="484" font-family="system-ui, Arial, sans-serif" font-size="21" fill="#4f4a3d">DEPLOY &#183; MINT &#183; TRANSFER</text>
+  <text x="470" y="520" font-family="system-ui, Arial, sans-serif" font-size="19" fill="#4f4a3d" opacity="0.9">Specification, guide, reference, test vectors, validator</text>
+  <text x="470" y="556" font-family="system-ui, Arial, sans-serif" font-size="18" fill="#14386e">bitcoinuniverseio.github.io/src-20</text>
+</svg>

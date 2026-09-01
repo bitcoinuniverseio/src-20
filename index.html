@@ -1,23 +1,321 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Stamps, SRC-20 & SRC-101 — Bitcoin culture designed to endure</title>
-  <meta name="description" content="Bitcoin Stamps transforms transaction data into lasting digital culture. SRC-20 brings fungible assets; SRC-101 adds names and records.">
-  <meta name="theme-color" content="#09090f">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRC-20: fungible tokens in unprunable Bitcoin outputs</title>
+<meta name="description" content="SRC-20 is a fungible token protocol on Bitcoin. Operations are JSON documents stored in transaction output scripts through the Bitcoin Stamps data carrier, so every full node keeps them. Specification, guide, reference, test vectors and a payload validator.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/src-20/">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="search-index" href="search-index.json">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SRC-20: fungible tokens in unprunable Bitcoin outputs">
+<meta property="og:description" content="The fungible token protocol built on Bitcoin Stamps. Specification, guide, reference, test vectors and a client-side payload validator.">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/src-20/">
+<meta property="og:image" content="https://bitcoinuniverseio.github.io/src-20/assets/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('src20-docs-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
-<body style="--accent:#ff3f81;--accent-2:#ffd15c">
-<div class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark">S</span><span>Stamps, SRC-20 & SRC-101</span></a><nav class="nav-links" aria-label="Main navigation"><a href="index.html" aria-current="page">Home</a><a href="reference.html">Discover</a><a href="guide.html">Get started</a><a class="nav-cta" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a></nav></div></div>
-<main>
-  <div class="wrap hero">
-    <div><div class="eyebrow">Bitcoin culture designed to endure</div><h1>Stamp it once. Let history keep it<span class="gradient">.</span></h1><p class="lede">Bitcoin Stamps transforms transaction data into lasting digital culture. SRC-20 brings fungible assets; SRC-101 adds names and records.</p><div class="actions"><a class="button primary" href="guide.html">Start your journey →</a><a class="button secondary" href="reference.html">Discover how it works</a></div></div>
-    <div class="hero-art"><div class="orbit"><img class="logo-art core" src="assets/stampchain-logo-480.svg" alt=""><span class="spark one">Bitcoin</span><span class="spark two">lasting culture</span><span class="spark three">onchain history</span></div></div>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 34" aria-hidden="true" focusable="false">
+        <rect x="1" y="2" width="28" height="30" rx="1" fill="var(--accent)"/>
+        <g fill="var(--paper)">
+          <circle cx="1" cy="2" r="1.7"/><circle cx="8" cy="2" r="1.7"/><circle cx="15" cy="2" r="1.7"/><circle cx="22" cy="2" r="1.7"/><circle cx="29" cy="2" r="1.7"/>
+          <circle cx="1" cy="32" r="1.7"/><circle cx="8" cy="32" r="1.7"/><circle cx="15" cy="32" r="1.7"/><circle cx="22" cy="32" r="1.7"/><circle cx="29" cy="32" r="1.7"/>
+          <circle cx="1" cy="9.5" r="1.7"/><circle cx="1" cy="17" r="1.7"/><circle cx="1" cy="24.5" r="1.7"/>
+          <circle cx="29" cy="9.5" r="1.7"/><circle cx="29" cy="17" r="1.7"/><circle cx="29" cy="24.5" r="1.7"/>
+        </g>
+        <text x="15" y="21" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="var(--on-accent)">20</text>
+      </svg>
+      <span>SRC-20</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html" aria-current="page">Overview</a></li>
+        <li><a href="specification.html">Specification</a></li>
+        <li><a href="guide.html">Guide</a></li>
+        <li><a href="reference.html">Reference</a></li>
+        <li><a href="vectors.html">Test vectors</a></li>
+        <li><a href="validator.html">Validator</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <form class="search" id="site-search" role="search" hidden>
+        <label class="visually-hidden" for="q">Search the SRC-20 documentation</label>
+        <input class="search-input" id="q" type="search" placeholder="Search (press /)" autocomplete="off">
+        <ul class="search-results" id="search-results" aria-live="polite"></ul>
+      </form>
+      <button class="theme-toggle" id="theme-toggle" type="button" hidden>Dark</button>
+    </div>
   </div>
-  <div class="band"><div class="wrap band-inner"><strong>Art. Assets. Identity. Stamped into Bitcoin.</strong><span>Built for curious humans, collectors, creators, and communities.</span></div></div>
-  <section><div class="wrap"><div class="section-head"><div><div class="eyebrow">Why it matters</div><h2>A whole ecosystem inside the ledger.</h2></div><p>Stamps gives creators and collectors a durable canvas. SRC-20 adds community tokens and SRC-101 adds names—each with a distinct lifecycle interpreted by compatible Stamps services.</p></div><div class="grid"><article class="card"><span class="num">01 / EXPERIENCE</span><h3>Stamps</h3><p>Discover art and culture preserved through Bitcoin transaction history.</p></article><article class="card"><span class="num">02 / EXPERIENCE</span><h3>SRC-20</h3><p>Explore fungible assets with deploy, mint, and transfer activity.</p></article><article class="card"><span class="num">03 / EXPERIENCE</span><h3>SRC-101</h3><p>Build identity through namespaces, unique names, renewals, and records.</p></article></div></div></section>
-  <section><div class="wrap spotlight"><div class="eyebrow">The protocol in plain language</div><h2>A clear idea with an onchain heartbeat.</h2><p>Stamps gives creators and collectors a durable canvas. SRC-20 adds community tokens and SRC-101 adds names—each with a distinct lifecycle interpreted by compatible Stamps services.</p><div class="fact-list" style="margin-top:34px"><div class="fact"><strong>Durable media</strong><span>Stamps content is carried through Bitcoin transaction data.</span></div><div class="fact"><strong>Community assets</strong><span>SRC-20 tracks token supply and balances through compatible services.</span></div><div class="fact"><strong>Onchain names</strong><span>SRC-101 gives names a distinct ownership and renewal lifecycle.</span></div><div class="fact"><strong>Shared history</strong><span>Confirmed transactions form the timeline behind each experience.</span></div></div></div></section>
-  <section><div class="wrap"><div class="spotlight"><div class="eyebrow">Ready to explore?</div><h2>See what your next Bitcoin Universe moment can become.</h2><p>Explore supported experiences, connect a wallet when you are ready, and review every transaction before it leaves your hands.</p><div class="actions"><a class="button primary" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a><a class="button secondary" href="guide.html">See the journey</a></div></div></div></section>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Bitcoin mainnet &middot; Fungible tokens &middot; Bitcoin Stamps sub-protocol</p>
+          <h1>Tokens printed into the ledger, not pasted onto it</h1>
+          <p class="lede">SRC-20 is a fungible token protocol on Bitcoin. Its <code>DEPLOY</code>, <code>MINT</code> and <code>TRANSFER</code> operations are plain JSON documents carried in <strong>transaction output scripts</strong>. Output scripts are what a node needs to validate future spends, so every full node keeps them, whether it wants to or not.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="specification.html">Read the specification</a>
+            <a class="btn" href="validator.html">Validate a payload</a>
+            <a class="btn" href="guide.html">Start with the guide</a>
+          </div>
+        </div>
+        <div>
+          <div class="stamp">
+            <p class="plate-title">At a glance</p>
+            <dl class="footer-meta small">
+              <dt>Chain and network</dt><dd>Bitcoin mainnet only</dd>
+              <dt>Token model</dt><dd>Account ledger, balance per address</dd>
+              <dt>Operations</dt><dd>DEPLOY, MINT, TRANSFER</dd>
+              <dt>Ticker</dt><dd>1 to 5 code points, case-insensitive</dd>
+              <dt>Decimals</dt><dd>0 to 18, default 18</dd>
+              <dt>Live since</dt><dd>Block 788041, April 2023</dd>
+              <dt>Lifecycle</dt><dd>Stable</dd>
+              <dt>Document version</dt><dd>2026.09.01</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="plain">What it actually is, in plain language</h2>
+      <p>A token on SRC-20 is a shared spreadsheet that nobody hosts. Somebody publishes a <strong>DEPLOY</strong> saying "there will be at most 21 million of a thing called PLATE, and each mint can take at most 1000". After that, anyone can publish a <strong>MINT</strong> to claim some, until the supply runs out, and anyone holding a balance can publish a <strong>TRANSFER</strong> to send it on.</p>
+      <p>Each of those is a short JSON document written into a Bitcoin transaction. Bitcoin does not know or care what the document says. It confirms the transaction, and then <em>indexers</em>, which are programs that read the whole chain in order, all apply the same rules and arrive at the same balances. The protocol is the agreement between those indexers.</p>
+
+      <div class="note">
+        <span class="note-title">The consequence people miss</span>
+        <p>A confirmed Bitcoin transaction is not the same thing as a successful token operation. Your transaction can confirm perfectly and your mint still be worth nothing, because the supply ran out three blocks earlier. Always check the result in an explorer after confirmation, not just the transaction status. The <a href="specification.html#validity">validity rules</a> spell out every case.</p>
+      </div>
+
+      <h3>Who this is for</h3>
+      <div class="grid-2">
+        <div class="panel">
+          <h4>If you hold or trade tokens</h4>
+          <p class="small">Start with the <a href="guide.html">guide</a>. It walks through what each operation costs, what "clamped" means when your mint comes back smaller than you asked for, and how to read a result.</p>
+        </div>
+        <div class="panel">
+          <h4>If you are building a wallet or app</h4>
+          <p class="small">Read the <a href="specification.html">specification</a> end to end, then check your parser against the <a href="vectors.html">test vectors</a>. The <a href="validator.html">validator</a> is useful while you are hand-writing payloads.</p>
+        </div>
+        <div class="panel">
+          <h4>If you are writing an indexer</h4>
+          <p class="small">The <a href="specification.html#heights">activation heights</a> and the <a href="reference.html#semantics">indexer semantics</a> are where implementations diverge. Reproduce them exactly or your ledger will not match anyone else's.</p>
+        </div>
+        <div class="panel">
+          <h4>If you came from BRC-20</h4>
+          <p class="small">The field names are the same and the rules are not. Go straight to the <a href="validator.html#brc20">difference table</a> before you write a payload.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="unprunable">The argument for output scripts</h2>
+      <p>This is the protocol's whole reason to exist, so it deserves an honest statement rather than a slogan.</p>
+
+      <ul class="denoms">
+        <li class="denom"><span class="denom-label">Payload location</span><span class="denom-value small">Output script</span><span class="denom-note">not input witness</span></li>
+        <li class="denom"><span class="denom-label">Retained by</span><span class="denom-value small">Every full node</span><span class="denom-note">as part of the UTXO set</span></li>
+        <li class="denom"><span class="denom-label">Cost of that</span><span class="denom-value small">Full weight</span><span class="denom-note">no witness discount, permanent UTXO growth</span></li>
+      </ul>
+
+      <p>An SRC-20 payload sits inside the <code>scriptPubKey</code> of outputs that can never be spent. Because a node must be able to validate a future spend of any unspent output, it must keep those scripts. The bytes are therefore held by every node running a full unspent-output set, permanently, as a side effect of how Bitcoin works rather than as a favour.</p>
+      <p>Inscription-based protocols put their payload in the witness of an input instead. That is committed by the block header just as firmly, and archival nodes keep it, but a validating node is <em>permitted</em> to discard it. The difference is not whether the data can be forged, because neither can. The difference is who is obliged to keep a copy.</p>
+      <p>The bill for this arrives as permanently larger UTXO sets for everyone running Bitcoin, and as higher fees for the person publishing, since output data pays full transaction weight with no witness discount. Both protocols are making a defensible trade. SRC-20 chose durability.</p>
+      <p class="small muted"><a href="specification.html#unprunable">Rules U-1 to U-4</a> state this formally, with the diagram.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="origin">Where it came from</h2>
+      <p>SRC-20 originated in the <strong>Bitcoin Stamps</strong> community in 2023, not in Bitcoin Universe. Bitcoin Universe indexes it, builds products on it, and maintains this documentation; it does not own or govern the protocol.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Origin and the record it left in the chain</caption>
+          <thead><tr><th scope="col">Block</th><th scope="col">What happened</th></tr></thead>
+          <tbody>
+            <tr><td class="col-narrow"><code>779652</code></td><td>First valid Bitcoin Stamp, carried as a Counterparty asset.</td></tr>
+            <tr><td class="col-narrow"><code>788041</code></td><td>First SRC-20 activity. Operations ride inside Counterparty issuances.</td></tr>
+            <tr><td class="col-narrow"><code>793068</code></td><td>First SRC-20 carried directly on Bitcoin, with no Counterparty encoding.</td></tr>
+            <tr><td class="col-narrow"><code>796000</code></td><td>Counterparty-encoded SRC-20 stops counting. The protocol becomes direct-to-Bitcoin.</td></tr>
+            <tr><td class="col-narrow"><code>865000</code></td><td>OLGA P2WSH encoding becomes available, replacing bare multisig for new transactions.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="note-title">On the Counterparty question</span>
+        <p>SRC-20 is often described as being "built on Counterparty". That was accurate for about 8000 blocks and has not been accurate since block 796000, after which Counterparty-encoded SRC-20 is <strong>ignored outright</strong>. An indexer built today still needs Counterparty to replay history below that height and to index classic Stamps, but SRC-20 state from 796000 onward comes from Bitcoin alone. <a href="specification.html#counterparty">The full account is in section 12</a>.</p>
+      </div>
+
+      <h3>Its relatives</h3>
+      <dl class="terms">
+        <dt>Bitcoin Stamps</dt>
+        <dd>The parent protocol. It stores images in the same unprunable output carrier. SRC-20 reuses that carrier and the <code>stamp:</code> prefix, and is told apart only by the <code>p</code> field of its JSON.</dd>
+        <dt>SRC-101</dt>
+        <dd>The naming protocol in the same family: namespaces, unique names, renewals and records. It shares the carrier and shares this ecosystem, but has its own operations and lifecycle. First seen at block 870652.</dd>
+        <dt>SRC-721</dt>
+        <dd>The non-fungible sibling, also carried by the same prefix and distinguished by <code>p</code>.</dd>
+      </dl>
+    </section>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="support">Support in Bitcoin Universe products</h2>
+      <p>Only capabilities that are wired up in the Bitcoin Universe ecosystem registry are listed here. Anything absent is absent on purpose.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Declared SRC-20 actions per surface, from the ecosystem capability registry</caption>
+          <thead><tr><th scope="col">Surface</th><th scope="col">Actions</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Core</th><td>view, discover, view-collection, view-activity, view-transaction</td></tr>
+            <tr><th scope="row">Wallet</th><td>view, send, receive</td></tr>
+            <tr><th scope="row">Inscribe</th><td>deploy, mint, transfer</td></tr>
+            <tr><th scope="row">StampDEX</th><td>view, discover, view-collection, view-activity, view-transaction, list, unlist, buy, cancel-offer, settle</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Marketplace activity for SRC-20 is <strong>owned by StampDEX</strong> and runs in <strong>external-execution</strong> mode: StampDEX holds the order book and the settlement authority, and Bitcoin Universe proxies to it rather than executing trades itself. The <a href="guide.html#support">guide has the complete matrix</a>, including each unsupported action and the recorded reason for it.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="pages">The rest of this site</h2>
+      <ul class="cards">
+        <li class="stamp card">
+          <span class="card-index">01 / Normative</span>
+          <h3><a href="specification.html">Specification</a></h3>
+          <p>Numbered rules for the carrier, both encodings, activation heights, ticker and numeric rules, the three operations, and every validity and invalidity condition.</p>
+        </li>
+        <li class="stamp card">
+          <span class="card-index">02 / Practical</span>
+          <h3><a href="guide.html">Guide</a></h3>
+          <p>Worked DEPLOY, MINT and TRANSFER examples end to end, what a transaction costs, and the verified product support matrix.</p>
+        </li>
+        <li class="stamp card">
+          <span class="card-index">03 / Operator</span>
+          <h3><a href="reference.html">Reference</a></h3>
+          <p>Terminology, confirmation and reorg behaviour, the Counterparty dependency stated honestly, limits, security considerations and an implementation checklist.</p>
+        </li>
+        <li class="stamp card">
+          <span class="card-index">04 / Proof</span>
+          <h3><a href="vectors.html">Test vectors</a></h3>
+          <p>Valid and invalid payloads with the outcome an indexer must produce, each one traced to the rule that decides it.</p>
+        </li>
+        <li class="stamp card">
+          <span class="card-index">05 / Tool</span>
+          <h3><a href="validator.html">Payload validator</a></h3>
+          <p>Paste a JSON operation and see every check explained, plus the BRC-20 differences. Runs entirely in your browser.</p>
+        </li>
+        <li class="stamp card">
+          <span class="card-index">06 / History</span>
+          <h3><a href="changelog.html">Changelog</a></h3>
+          <p>Version history for this document, and the protocol-level changes it records.</p>
+        </li>
+      </ul>
+    </section>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="links">Entry points and links</h2>
+      <div class="grid-2">
+        <div class="panel">
+          <h3 class="label-head">Protocol sources</h3>
+          <ul class="linklist small">
+            <li><a href="https://github.com/stampchain-io/btc_stamps">btc_stamps</a>, the Bitcoin Stamps indexer and the reference implementation for these rules</li>
+            <li><a href="https://stampchain.io/">Stampchain</a>, the public explorer and API</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3 class="label-head">Bitcoin Universe</h3>
+          <ul class="linklist small">
+            <li><a href="https://docs.bitcoinuniverse.io">Central documentation portal</a></li>
+            <li><a href="https://github.com/bitcoinuniverseio/src-20">This repository</a></li>
+            <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability privately</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="note note-warn">
+        <span class="note-title">Staying safe</span>
+        <p>Never share a seed phrase or private key, and never blind-sign. Before signing, check the network, the recipient, the amount, the outputs and the fee. Ticker symbols can look alike, so verify a token by its deploy transaction rather than by a familiar word or logo. A confirmed transaction does not by itself guarantee the token result you expected: follow it in an explorer afterwards.</p>
+      </div>
+    </section>
+
+    <nav class="page-nav" aria-label="Page">
+      <span></span>
+      <a href="specification.html">Specification &rarr;</a>
+    </nav>
+
+  </div>
 </main>
-<footer><div class="wrap footer-inner"><span>Stamps, SRC-20 & SRC-101 on Bitcoin</span><span>Presented by <a href="https://github.com/bitcoinuniverse/src-20">Bitcoin Universe</a></span></div></footer></body></html>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Documentation</h2>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="specification.html">Specification</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="vectors.html">Test vectors</a></li>
+          <li><a href="validator.html">Validator</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://docs.bitcoinuniverse.io">Bitcoin Universe docs portal</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20">Source repository</a></li>
+          <li><a href="https://github.com/stampchain-io/btc_stamps">Bitcoin Stamps indexer</a></li>
+          <li><a href="https://stampchain.io/">Stampchain explorer</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This document</h2>
+        <dl class="footer-meta">
+          <dt>Owning repository</dt><dd>bitcoinuniverseio/src-20</dd>
+          <dt>Source path</dt><dd><code>index.html</code></dd>
+          <dt>Spec version</dt><dd>2026.09.01</dd>
+          <dt>Lifecycle</dt><dd>Stable</dd>
+          <dt>Chain / network</dt><dd>Bitcoin mainnet</dd>
+          <dt>Last verified</dt><dd><time datetime="2026-09-01">1 September 2026</time></dd>
+        </dl>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>SRC-20 originated in the Bitcoin Stamps community. This site documents it; it does not own it.</span>
+      <a href="https://github.com/bitcoinuniverseio/src-20/edit/main/index.html">Edit this page on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

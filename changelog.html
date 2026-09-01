@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRC-20 changelog</title>
+<meta name="description" content="Version history for the SRC-20 documentation, and the protocol-level consensus changes it records, each tied to the Bitcoin block height where behaviour changed.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/src-20/changelog.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="search-index" href="search-index.json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SRC-20 changelog">
+<meta property="og:description" content="Document version history and the protocol changes it records.">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/src-20/changelog.html">
+<meta property="og:image" content="https://bitcoinuniverseio.github.io/src-20/assets/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('src20-docs-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 34" aria-hidden="true" focusable="false">
+        <rect x="1" y="2" width="28" height="30" rx="1" fill="var(--accent)"/>
+        <g fill="var(--paper)">
+          <circle cx="1" cy="2" r="1.7"/><circle cx="8" cy="2" r="1.7"/><circle cx="15" cy="2" r="1.7"/><circle cx="22" cy="2" r="1.7"/><circle cx="29" cy="2" r="1.7"/>
+          <circle cx="1" cy="32" r="1.7"/><circle cx="8" cy="32" r="1.7"/><circle cx="15" cy="32" r="1.7"/><circle cx="22" cy="32" r="1.7"/><circle cx="29" cy="32" r="1.7"/>
+          <circle cx="1" cy="9.5" r="1.7"/><circle cx="1" cy="17" r="1.7"/><circle cx="1" cy="24.5" r="1.7"/>
+          <circle cx="29" cy="9.5" r="1.7"/><circle cx="29" cy="17" r="1.7"/><circle cx="29" cy="24.5" r="1.7"/>
+        </g>
+        <text x="15" y="21" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="var(--on-accent)">20</text>
+      </svg>
+      <span>SRC-20</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="specification.html">Specification</a></li>
+        <li><a href="guide.html">Guide</a></li>
+        <li><a href="reference.html">Reference</a></li>
+        <li><a href="vectors.html">Test vectors</a></li>
+        <li><a href="validator.html">Validator</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <form class="search" id="site-search" role="search" hidden>
+        <label class="visually-hidden" for="q">Search the SRC-20 documentation</label>
+        <input class="search-input" id="q" type="search" placeholder="Search (press /)" autocomplete="off">
+        <ul class="search-results" id="search-results" aria-live="polite"></ul>
+      </form>
+      <button class="theme-toggle" id="theme-toggle" type="button" hidden>Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="hero">
+      <p class="eyebrow">History</p>
+      <h1>Changelog</h1>
+      <p class="lede">Two histories, kept separate: the version history of this document, and the consensus changes in the protocol it describes.</p>
+    </div>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="document">Document versions</h2>
+
+      <h3 id="v2026-09-01">2026.09.01</h3>
+      <p class="small muted">Verified against <code>btc_stamps</code> indexer 1.9.3 and the Bitcoin Universe ecosystem capability registry snapshot of 31 August 2026.</p>
+      <p>Complete rebuild of this documentation from the protocol implementations, replacing marketing-oriented pages with a normative specification.</p>
+      <ul>
+        <li>Added a numbered <a href="specification.html">specification</a> covering the data carrier, both encodings, activation heights, ticker and numeric rules, the three operations, and the full validity and invalidity taxonomy.</li>
+        <li>Documented both carriers precisely: bare multisig with ARC4 keyed on input 0's previous txid and a required burn key, and OLGA P2WSH from block 865000, including the deliberate absence of a multisig fallback.</li>
+        <li>Corrected the widespread description of SRC-20 as a Counterparty protocol. Counterparty-encoded SRC-20 has been ignored since block 796000.</li>
+        <li>Recorded that <code>OP_RETURN</code> is not an SRC-20 data carrier, contrary to common description.</li>
+        <li>Documented the clamping mint statuses <code>OMA</code> and <code>ODL</code> as <strong>valid</strong> outcomes, which is the most frequent source of indexer divergence.</li>
+        <li>Documented the truncation asymmetry: <code>max</code> and <code>lim</code> round down, <code>amt</code> does not.</li>
+        <li>Documented the pre-833000 numeric stripping behaviour, which changes historical supply figures if not reproduced.</li>
+        <li>Recorded that the <code>BULK_XFER</code> code path in the reference indexer is unreachable and must not be implemented.</li>
+        <li>Recorded that a DEPLOY missing <code>max</code> or <code>lim</code> reports status <code>DE</code>, whose message misleadingly reads "DEPLOY EXISTS".</li>
+        <li>Added a client-side <a href="validator.html">payload validator</a> reproducing the field-level rules, with the BRC-20 difference table.</li>
+        <li>Added <a href="vectors.html">test vectors</a> including a stateful lifecycle covering both clamping cases.</li>
+        <li>Added <a href="reference.html">indexer semantics</a> for ordering, confirmation, the absence of mempool state, and reorg handling.</li>
+        <li>Replaced the product support claims with the actions declared in the ecosystem capability registry, including each unsupported marketplace action and its recorded reason.</li>
+        <li>Added local search, a theme toggle, a changelog, a 404 page, <code>sitemap.xml</code>, <code>robots.txt</code> and a validated <code>docs.manifest.json</code>.</li>
+        <li>Corrected the site's own published URLs, which previously pointed at a <code>bitcoinuniverse.github.io</code> host rather than the real <code>bitcoinuniverseio.github.io</code> Pages origin.</li>
+      </ul>
+
+      <h3 id="v2026-08">Earlier</h3>
+      <p>The repository previously published a three-page introduction covering Bitcoin Stamps, SRC-20 and SRC-101 together. Its accurate content, the protocol relationships and the user-safety guidance, is carried forward into the <a href="index.html#origin">overview</a> and the <a href="guide.html#safety">guide</a>. The Stampchain logo and its <a href="https://github.com/bitcoinuniverseio/src-20/blob/main/assets/ATTRIBUTION.md">attribution</a> are retained unchanged.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section class="prose-wide">
+      <h2 id="protocol">Protocol changes</h2>
+      <p>SRC-20 has no upstream versioned specification. Its history is a sequence of block heights at which indexer behaviour changed, and those heights are the protocol's real version numbers.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Consensus-relevant changes, from <code>btc_stamps</code> <code>indexer/src/config.py</code></caption>
+          <thead><tr><th scope="col">Height</th><th scope="col">Approx. date</th><th scope="col">Change</th></tr></thead>
+          <tbody>
+            <tr><td class="col-narrow"><code>788041</code></td><td>April 2023</td><td>SRC-20 begins. Operations are carried inside Counterparty issuances, requiring a numeric asset id and a declared supply of 0.</td></tr>
+            <tr><td class="col-narrow"><code>793068</code></td><td>May 2023</td><td>First SRC-20 carried directly on Bitcoin, with no Counterparty encoding.</td></tr>
+            <tr><td class="col-narrow"><code>796000</code></td><td>June 2023</td><td>Counterparty-encoded SRC-20 stops counting. Every such operation at or after this height is ignored, making the protocol direct-to-Bitcoin.</td></tr>
+            <tr><td class="col-narrow"><code>833000</code></td><td>February 2024</td><td>Numeric parsing becomes strict. Below this height every character that was not a digit or a dot was stripped from a numeric string before parsing; from here a malformed numeric excludes the transaction.</td></tr>
+            <tr><td class="col-narrow"><code>865000</code></td><td>October 2024</td><td>OLGA P2WSH encoding becomes available for SRC-20, carrying payload bytes in 32-byte witness programs with no encryption. It takes precedence over bare multisig.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="small muted">Dates are approximate, derived from typical block intervals. The heights are exact and are what an indexer must use.</p>
+
+      <div class="note">
+        <span class="note-title">Proposals are not changes</span>
+        <p>Proposals exist to add conditional transfers to SRC-20, which would make non-custodial marketplace escrow possible. None is activated at a block height, and none is implemented by the reference indexers. Until a proposal has an activation height and agreeing implementations, it is not protocol behaviour and this document will not describe it as such.</p>
+      </div>
+    </section>
+
+    <nav class="page-nav" aria-label="Page">
+      <a href="index.html">&larr; Overview</a>
+      <a href="specification.html">Specification &rarr;</a>
+    </nav>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Documentation</h2>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="specification.html">Specification</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="vectors.html">Test vectors</a></li>
+          <li><a href="validator.html">Validator</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://docs.bitcoinuniverse.io">Bitcoin Universe docs portal</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20">Source repository</a></li>
+          <li><a href="https://github.com/stampchain-io/btc_stamps">Bitcoin Stamps indexer</a></li>
+          <li><a href="https://stampchain.io/">Stampchain explorer</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This document</h2>
+        <dl class="footer-meta">
+          <dt>Owning repository</dt><dd>bitcoinuniverseio/src-20</dd>
+          <dt>Source path</dt><dd><code>changelog.html</code></dd>
+          <dt>Spec version</dt><dd>2026.09.01</dd>
+          <dt>Lifecycle</dt><dd>Stable</dd>
+          <dt>Chain / network</dt><dd>Bitcoin mainnet</dd>
+          <dt>Last verified</dt><dd><time datetime="2026-09-01">1 September 2026</time></dd>
+        </dl>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>SRC-20 originated in the Bitcoin Stamps community. This site documents it; it does not own it.</span>
+      <a href="https://github.com/bitcoinuniverseio/src-20/edit/main/changelog.html">Edit this page on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>
