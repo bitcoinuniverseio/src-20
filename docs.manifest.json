@@ -4,7 +4,7 @@
   "name": "SRC-20",
   "classification": "protocol",
   "repository": "bitcoinuniverseio/src-20",
-  "documentationUrl": "https://docs.bitcoinuniverse.io/protocols/src-20/",
+  "documentationUrl": "https://docs.bitcoinuniverse.io/protocols/src20/",
   "docsRoot": ".",
   "sourceRef": "main",
   "releasedRef": "6d5e8d9aa78be8464e07f5e6381708b663a43e89",
