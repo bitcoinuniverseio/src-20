@@ -1,19 +1,400 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Discover Stamps, SRC-20 & SRC-101 — Bitcoin Universe</title>
-  <meta name="description" content="A plain-language look at Stamps, SRC-20 & SRC-101 and its onchain experience.">
-  <meta name="theme-color" content="#09090f">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRC-20 reference: indexer semantics and terminology</title>
+<meta name="description" content="SRC-20 terminology, indexer semantics for confirmation, mempool and reorg, the Counterparty dependency stated honestly, the relationship to Bitcoin Stamps and SRC-101, size and fee considerations, limitations, security considerations and an implementation checklist.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/src-20/reference.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="search-index" href="search-index.json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SRC-20 reference">
+<meta property="og:description" content="Terminology, indexer semantics, limitations and an implementation checklist for SRC-20.">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/src-20/reference.html">
+<meta property="og:image" content="https://bitcoinuniverseio.github.io/src-20/assets/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('src20-docs-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
-<body style="--accent:#ff3f81;--accent-2:#ffd15c">
-<div class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark">S</span><span>Stamps, SRC-20 & SRC-101</span></a><nav class="nav-links" aria-label="Main navigation"><a href="index.html">Home</a><a href="reference.html" aria-current="page">Discover</a><a href="guide.html">Get started</a><a class="nav-cta" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a></nav></div></div>
-<main>
-  <div class="wrap hero compact"><div><div class="eyebrow">Discover Stamps, SRC-20 & SRC-101</div><h1>See the idea behind the <span class="gradient">transaction.</span></h1><p class="lede">Stamps gives creators and collectors a durable canvas. SRC-20 adds community tokens and SRC-101 adds names—each with a distinct lifecycle interpreted by compatible Stamps services.</p><div class="actions"><a class="button primary" href="guide.html">Get started →</a><a class="button secondary" href="index.html">Back home</a></div></div><div class="hero-art"><div class="orbit"><img class="logo-art core" src="assets/stampchain-logo-480.svg" alt=""><span class="spark one">Bitcoin</span><span class="spark two">lasting culture</span><span class="spark three">onchain history</span></div></div></div>
-  <section><div class="wrap"><div class="section-head"><div><div class="eyebrow">How it comes together</div><h2>Four ideas. One connected experience.</h2></div><p>Protocol details matter most when they help you understand what you are about to create, collect, or send.</p></div><div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><article class="card"><span class="num">01 / IDEA</span><h3>Durable media</h3><p>Stamps content is carried through Bitcoin transaction data.</p></article><article class="card"><span class="num">02 / IDEA</span><h3>Community assets</h3><p>SRC-20 tracks token supply and balances through compatible services.</p></article><article class="card"><span class="num">03 / IDEA</span><h3>Onchain names</h3><p>SRC-101 gives names a distinct ownership and renewal lifecycle.</p></article><article class="card"><span class="num">04 / IDEA</span><h3>Shared history</h3><p>Confirmed transactions form the timeline behind each experience.</p></article></div></div></section>
-  <section><div class="wrap spotlight"><div class="eyebrow">Keep the meaning clear</div><h2>Bitcoin confirms the transaction. Compatible services reveal the experience.</h2><p>Bitcoin confirms the transaction; compatible Stamps services interpret asset and name activity. Never share a seed phrase, never blind-sign, and always verify recipients, amounts, outputs, and fees.</p></div></section>
-  <section><div class="wrap"><div class="section-head"><div><div class="eyebrow">Explore the ecosystem</div><h2>Follow the story further.</h2></div><p>These community resources offer more context around the protocol and the world growing around it.</p></div><div class="source-list"><a class="source" href="https://stampchain.io/" target="_blank" rel="noreferrer"><span>Enter the Bitcoin Stamps ecosystem</span><span>Visit ↗</span></a><a class="source" href="https://bitcoinuniverse.github.io/src-101/" target="_blank" rel="noreferrer"><span>Discover SRC-101</span><span>Visit ↗</span></a></div></div></section>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 34" aria-hidden="true" focusable="false">
+        <rect x="1" y="2" width="28" height="30" rx="1" fill="var(--accent)"/>
+        <g fill="var(--paper)">
+          <circle cx="1" cy="2" r="1.7"/><circle cx="8" cy="2" r="1.7"/><circle cx="15" cy="2" r="1.7"/><circle cx="22" cy="2" r="1.7"/><circle cx="29" cy="2" r="1.7"/>
+          <circle cx="1" cy="32" r="1.7"/><circle cx="8" cy="32" r="1.7"/><circle cx="15" cy="32" r="1.7"/><circle cx="22" cy="32" r="1.7"/><circle cx="29" cy="32" r="1.7"/>
+          <circle cx="1" cy="9.5" r="1.7"/><circle cx="1" cy="17" r="1.7"/><circle cx="1" cy="24.5" r="1.7"/>
+          <circle cx="29" cy="9.5" r="1.7"/><circle cx="29" cy="17" r="1.7"/><circle cx="29" cy="24.5" r="1.7"/>
+        </g>
+        <text x="15" y="21" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="var(--on-accent)">20</text>
+      </svg>
+      <span>SRC-20</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="specification.html">Specification</a></li>
+        <li><a href="guide.html">Guide</a></li>
+        <li><a href="reference.html" aria-current="page">Reference</a></li>
+        <li><a href="vectors.html">Test vectors</a></li>
+        <li><a href="validator.html">Validator</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <form class="search" id="site-search" role="search" hidden>
+        <label class="visually-hidden" for="q">Search the SRC-20 documentation</label>
+        <input class="search-input" id="q" type="search" placeholder="Search (press /)" autocomplete="off">
+        <ul class="search-results" id="search-results" aria-live="polite"></ul>
+      </form>
+      <button class="theme-toggle" id="theme-toggle" type="button" hidden>Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="hero">
+      <p class="eyebrow">Reference &middot; For implementers and operators</p>
+      <h1>SRC-20 reference</h1>
+      <p class="lede">Terminology, the semantics an indexer has to reproduce, the honest state of the Counterparty dependency, and the things that will bite you.</p>
+    </div>
+
+    <div class="toc">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#terms">Terminology</a></li>
+        <li><a href="#semantics">Indexer semantics</a></li>
+        <li><a href="#counterparty">The Counterparty dependency</a></li>
+        <li><a href="#stamps">Bitcoin Stamps, SRC-101 and SRC-721</a></li>
+        <li><a href="#size">Size and fee considerations</a></li>
+        <li><a href="#limits">Limitations</a></li>
+        <li><a href="#security">Security considerations</a></li>
+        <li><a href="#checklist">Implementation checklist</a></li>
+      </ol>
+    </div>
+
+    <hr class="perf">
+
+    <section id="terms" class="prose-wide">
+      <h2>1. Terminology</h2>
+      <dl class="terms">
+        <dt>Account ledger</dt>
+        <dd>An ownership model where a balance is attached to an address rather than to a specific unspent output. SRC-20 uses this model. It is the reason there is no such thing as an output that "holds" your tokens, and the reason a listing cannot be escrowed by locking one.</dd>
+
+        <dt>ARC4</dt>
+        <dd>The stream cipher applied to the bare multisig carrier. It provides no confidentiality here, since the key is public: the key is the txid of the output spent by input 0, byte-reversed. Its function is to bind the payload to that input and to make the data bytes look like plausible public keys.</dd>
+
+        <dt>Burn key</dt>
+        <dd>One of five recognised public keys used as the third key of a 1-of-3 multisig data output. Nobody holds the private key, so the output is unspendable. Its presence sets the keyburn flag, and without that flag a multisig-carried payload is not recognised as SRC-20.</dd>
+
+        <dt>Clamping</dt>
+        <dd>Reducing a mint's amount to the remaining supply (status <code>OMA</code>) or to the per-mint limit (status <code>ODL</code>). A clamped mint is <strong>valid</strong> and does change state. See <a href="specification.html#validity">V-6 to V-8</a>.</dd>
+
+        <dt>Creator</dt>
+        <dd>The address that controls the output spent by input 0. It is the actor for every operation: the deployer of a DEPLOY, the payer of a MINT, the sender of a TRANSFER.</dd>
+
+        <dt>Destination</dt>
+        <dd>The address encoded in output 0. It receives a MINT and receives a TRANSFER. It need not be the creator.</dd>
+
+        <dt>Excluded</dt>
+        <dd>A transaction that never becomes an SRC-20 record: the carrier failed, the prefix was missing, the JSON did not parse, or a field failed a carrier-level check. Excluded transactions have no status code and appear nowhere.</dd>
+
+        <dt>Invalid</dt>
+        <dd>A transaction that is recognised and recorded as an SRC-20 operation but changes no balance. It carries a status code and appears in activity feeds.</dd>
+
+        <dt>Keyburn</dt>
+        <dd>A flag set when a recognised burn key is seen in a multisig data output, and set unconditionally by the OLGA decoder. SRC-20 recognition requires it.</dd>
+
+        <dt>Ledger hash</dt>
+        <dd>A per-block digest of the valid SRC-20 state produced by the reference indexer. Two indexers that agree on every block's ledger hash agree on the ledger. It is the practical tool for detecting divergence.</dd>
+
+        <dt>OLGA</dt>
+        <dd>The P2WSH carrier, available for SRC-20 from block 865000. The payload occupies the 32-byte witness program of each data output, unencrypted. It takes precedence over bare multisig.</dd>
+
+        <dt>Stamps prefix</dt>
+        <dd>The six ASCII bytes <code>stamp:</code> that mark a decoded buffer as Bitcoin Stamps data. Shared by SRC-20, SRC-721 and SRC-101, which are told apart by the <code>p</code> field of the JSON that follows.</dd>
+
+        <dt>Tick hash</dt>
+        <dd>The SHA3-256 hex digest of the lowercased ticker. NIST SHA3, not Keccak. Used as a stable database key for tickers containing awkward characters.</dd>
+
+        <dt>Unprunable output</dt>
+        <dd>An output whose script a full node must retain because the output is unspent and could in principle be spent. SRC-20 data outputs are unspendable in practice, so they are retained permanently.</dd>
+      </dl>
+    </section>
+
+    <hr class="perf">
+
+    <section id="semantics" class="prose-wide">
+      <h2>2. Indexer semantics</h2>
+
+      <h3 id="ordering">2.1 Ordering</h3>
+      <p>Blocks are processed in height order and transactions in block order. A running balance and a running mint total are maintained <em>within</em> a block, so an operation sees the effect of every earlier valid operation in the same block. Two transfers of a full balance in one block cannot both succeed.</p>
+      <p>Where two DEPLOY operations for the same ticker land in the same block, the earlier transaction in block order takes the ticker, and the later is invalid with status <code>DE</code>.</p>
+
+      <h3 id="confirmation">2.2 Confirmation</h3>
+      <p>SRC-20 state is derived from <strong>confirmed blocks only</strong>. The reference indexer parses transactions as it processes a block; there is no separate confirmation threshold at which an operation becomes valid, because an operation in a confirmed block is either valid or not the moment that block is processed.</p>
+      <p>Practical confirmation depth is therefore a policy decision for the application, not a protocol rule. What the protocol gives you is: once a block is buried deeply enough that a reorg is implausible, the operations in it are settled.</p>
+
+      <h3 id="mempool">2.3 Mempool</h3>
+      <div class="note note-warn">
+        <span class="note-title">There is no pending state</span>
+        <p>SRC-20 has no mempool semantics. An unconfirmed transaction has no SRC-20 meaning at all: it cannot be validated, because validity depends on the total minted and the sender's balance at a specific point in the chain, and neither is defined for an unconfirmed transaction.</p>
+        <p>Bitcoin Universe's own Stamps indexer reports its SRC-20 source coverage as <strong>partial</strong> for exactly this reason: the upstream adapters lack an exhaustive mempool feed with a stable pending lifecycle and disappearance handling. A wallet may show a transaction as pending, but no indexer can honestly promise what it will do until it confirms.</p>
+      </div>
+      <p>The consequence for user interfaces: never show a projected balance from an unconfirmed SRC-20 operation as though it were real. A mint that looks like 1000 in the mempool can be a valid mint of 3 once the block lands.</p>
+
+      <h3 id="reorg">2.4 Reorganizations</h3>
+      <p>Because SRC-20 balances are a fold over the whole chain, a reorg invalidates every derived value from the divergence point forward. The reference indexer handles this by rolling back rather than by patching.</p>
+      <ul class="rules">
+        <li><span class="rule-id">R-1</span><div class="rule-body"><p>On detecting a chain reorganization, the reference indexer rolls back <strong>10 blocks below</strong> the affected height rather than exactly to the divergence point, deliberately over-rewinding for safety, then re-processes forward.</p></div></li>
+        <li><span class="rule-id">R-2</span><div class="rule-body"><p>Rollback re-derives balances. There is no attempt to reverse individual operations in place, because clamped mints and running balances make an operation's effect dependent on everything before it.</p></div></li>
+        <li><span class="rule-id">R-3</span><div class="rule-body"><p>Downstream consumers must be told. Bitcoin Universe's Stamps indexer publishes explicit event invalidations on reorg, clears orphaned deployment snapshots, and marks orphaned assets unavailable <em>before</em> replacement state is published, so a consumer never sees two conflicting truths at once.</p></div></li>
+        <li><span class="rule-id">R-4</span><div class="rule-body"><p>A reorg at or below a finalized height is rejected outright rather than applied. Choose that finality depth conservatively; it is the point past which your indexer refuses to rewrite history.</p></div></li>
+      </ul>
+      <p>The interesting failure mode is a reorg that reorders two transactions within a block boundary. That can change which DEPLOY won a ticker, or turn a valid transfer into a <code>BB</code> failure, without either transaction being dropped from the chain.</p>
+
+      <h3 id="agreement">2.5 Checking that you agree with everyone else</h3>
+      <p>The reference indexer computes a ledger hash per block over the valid SRC-20 state and can validate it against an external API, queueing mismatches for background revalidation. If you are writing an indexer, reproduce that hash and compare: it will find a divergence far faster than noticing a wrong balance months later.</p>
+      <p>The usual causes of divergence, in rough order of frequency: treating clamped mints as invalid, applying strict numeric parsing below height 833000, adding a multisig fallback when the OLGA branch fails, and getting the truncation asymmetry between <code>max</code>/<code>lim</code> and <code>amt</code> wrong.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="counterparty" class="prose-wide">
+      <h2>3. The Counterparty dependency</h2>
+      <p>Stated plainly, because it is usually stated wrongly in both directions.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>What Counterparty is needed for</caption>
+          <thead><tr><th scope="col">Scope</th><th scope="col">Counterparty required?</th><th scope="col">Detail</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">SRC-20, blocks 788041 to 795999</th><td class="no">Yes</td><td>Operations ride inside Counterparty issuances. The indexer requires a numeric asset id beginning with <code>A</code> and a declared supply of 0.</td></tr>
+            <tr><th scope="row">SRC-20, block 796000 onward</th><td class="yes">No</td><td>Counterparty-encoded SRC-20 is ignored from this height. Only transactions with no Counterparty asset id count.</td></tr>
+            <tr><th scope="row">Classic Bitcoin Stamps</th><td class="no">Yes</td><td>Stamps assets remain Counterparty assets, so a Stamps indexer keeps its Counterparty dependency regardless of SRC-20.</td></tr>
+            <tr><th scope="row">A new SRC-20-only indexer</th><td>Partly</td><td>Needed to replay history below 796000. Not needed for anything after it.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>So both of these statements are wrong: "SRC-20 runs on Counterparty" (it stopped in 2023) and "SRC-20 never needed Counterparty" (its first 8000 blocks did, and those balances are still live).</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="stamps" class="prose-wide">
+      <h2>4. Bitcoin Stamps, SRC-101 and SRC-721</h2>
+      <p>Four protocols share one carrier. Everything below the JSON is identical; the <code>p</code> field is the only thing that separates them.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>The Stamps protocol family</caption>
+          <thead><tr><th scope="col">Protocol</th><th scope="col">What it is</th><th scope="col">Ownership model</th><th scope="col">First block</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Bitcoin Stamps</th><td>Images stored in unprunable outputs</td><td>Counterparty asset</td><td><code>779652</code></td></tr>
+            <tr><th scope="row">SRC-20</th><td>Fungible tokens</td><td>Account ledger, balance per address</td><td><code>788041</code></td></tr>
+            <tr><th scope="row">SRC-721</th><td>Non-fungible tokens</td><td>Asset-based</td><td><code>792370</code></td></tr>
+            <tr><th scope="row">SRC-101</th><td>Names: namespaces, registration, renewal, records</td><td>Hybrid</td><td><code>870652</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>For an indexer this matters in one specific way: you cannot decide whether a transaction is SRC-20 until after you have decoded the carrier and parsed the JSON. The prefix check tells you it is a Stamps transaction; only the <code>p</code> field tells you which one. A parser that assumes every <code>stamp:</code> payload is SRC-20 will trip over images and names.</p>
+
+      <p>SRC-101 got its own OLGA P2WSH activation later than SRC-20, and one detail of the OLGA decoder is conditional on that height, so the family members do not share a single activation table. Treat each sub-protocol's heights separately.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="size" class="prose-wide">
+      <h2>5. Size and fee considerations</h2>
+
+      <ul class="denoms">
+        <li class="denom denom-outline"><span class="denom-label">OLGA capacity</span><span class="denom-value">32 B</span><span class="denom-note">per P2WSH data output</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Multisig capacity</span><span class="denom-value">62 B</span><span class="denom-note">2 keys of 31 B per output</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Framing overhead</span><span class="denom-value">8 B</span><span class="denom-note">2 B length plus "stamp:"</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Length ceiling</span><span class="denom-value">65535</span><span class="denom-note">the 16-bit length prefix</span></li>
+      </ul>
+
+      <p>Three properties follow from the carrier and are worth designing around.</p>
+      <dl class="terms">
+        <dt>No witness discount</dt>
+        <dd>Output data pays full transaction weight. The same payload costs roughly four times what it would in a witness. This is the price of the durability guarantee, not an implementation inefficiency.</dd>
+        <dt>Dust is destroyed, not spent</dt>
+        <dd>Every data output must carry enough value to be relayed, and that value can never be recovered. It is a real cost per output, so payload length translates directly into permanently lost value as well as fee.</dd>
+        <dt>JSON length is under your control</dt>
+        <dd>Omitting optional metadata from a DEPLOY, and keeping tickers short, changes how many data outputs you need. The <a href="guide.html#cost">guide's cost table</a> shows a 29-byte difference moving a payload from 2 data outputs to 3.</dd>
+      </dl>
+
+      <p>The 16-bit length prefix caps a single payload at 65535 bytes including the prefix. No realistic SRC-20 operation approaches it; the limit matters for Bitcoin Stamps images sharing the same carrier.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="limits" class="prose-wide">
+      <h2>6. Limitations</h2>
+      <ul class="rules">
+        <li><span class="rule-id">L-1</span><div class="rule-body"><p><strong>No escrow primitive.</strong> Because balances are account-based, no output can be locked to back a listing. A seller can transfer the same balance elsewhere before settlement, and no indexer can prevent it. Any marketplace must therefore either accept liveness and dispute risk through cooperative multisig, or take custody.</p></div></li>
+        <li><span class="rule-id">L-2</span><div class="rule-body"><p><strong>No conditional transfers.</strong> There is no hashlock, timelock, or atomic swap primitive in the active protocol. Proposals exist as drafts; a draft is not protocol behaviour and must not be implemented as though it were.</p></div></li>
+        <li><span class="rule-id">L-3</span><div class="rule-body"><p><strong>No burn, no mint authority, no supply change.</strong> A DEPLOY is final. There is no way to increase supply, reduce it, revoke a balance, or pause a token.</p></div></li>
+        <li><span class="rule-id">L-4</span><div class="rule-body"><p><strong>No batch operations.</strong> One operation per transaction. The <code>BULK_XFER</code> code path in the reference indexer is unreachable, and payloads using it are invalid with status <code>UO</code>.</p></div></li>
+        <li><span class="rule-id">L-5</span><div class="rule-body"><p><strong>No standards body.</strong> The protocol is whatever the indexers agree on. There is no versioned specification with a changelog upstream, which is why this document quotes constants from code rather than citing clause numbers.</p></div></li>
+        <li><span class="rule-id">L-6</span><div class="rule-body"><p><strong>Permanent UTXO growth.</strong> Every SRC-20 transaction adds unspendable entries to every full node's unspent output set, forever. This is an externality the protocol imposes on people who are not using it.</p></div></li>
+        <li><span class="rule-id">L-7</span><div class="rule-body"><p><strong>Ticker squatting is trivial.</strong> Tickers are at most 5 code points, first-deploy-wins, and cost only a transaction fee to claim.</p></div></li>
+      </ul>
+    </section>
+
+    <hr class="perf">
+
+    <section id="security" class="prose-wide">
+      <h2>7. Security considerations</h2>
+
+      <h3>For users</h3>
+      <ul>
+        <li><strong>Confirmation is not success.</strong> A transaction can confirm and the operation still be invalid. Check the status in an explorer.</li>
+        <li><strong>Lookalike tickers.</strong> The character set includes many visually confusable characters, and the length limit makes near-misses easy. Identify a token by its deploy transaction hash.</li>
+        <li><strong>Metadata is unverified.</strong> The <code>x</code>, <code>web</code>, <code>email</code> and <code>tg</code> fields of a DEPLOY are free text with no verification of any kind.</li>
+        <li><strong>Failed operations still cost.</strong> The Bitcoin fee is paid and the dust in the data outputs is destroyed regardless of outcome.</li>
+        <li><strong>Never blind-sign.</strong> An SRC-20 transaction legitimately has several odd-looking outputs. That makes it a good disguise for something else, so read what you are signing.</li>
+      </ul>
+
+      <h3>For implementers</h3>
+      <ul>
+        <li><strong>Do not trust a single indexer for balances that back value.</strong> Compare ledger hashes across at least two independent implementations before settling anything.</li>
+        <li><strong>Reproduce historical behaviour exactly</strong>, including the pre-833000 numeric stripping. An indexer that is "more correct" than the reference is wrong, because the protocol is the agreement, not the ideal.</li>
+        <li><strong>Do not add a multisig fallback</strong> when the OLGA branch fails its length check. It looks like a bug fix and it forks the ledger.</li>
+        <li><strong>Handle reorgs by re-deriving</strong>, not by reversing operations. Clamped mints make an operation's effect context-dependent.</li>
+        <li><strong>Do not surface unconfirmed operations as balances.</strong> There is no honest pending state.</li>
+        <li><strong>Treat draft proposals as drafts.</strong> Implementing an unactivated escrow primitive because a proposal describes it produces state no other indexer shares.</li>
+      </ul>
+    </section>
+
+    <hr class="perf">
+
+    <section id="checklist" class="prose-wide">
+      <h2>8. Implementation checklist</h2>
+      <p>Work through this against the <a href="vectors.html">test vectors</a>.</p>
+
+      <h3>Carrier</h3>
+      <ul>
+        <li>Decode 1-of-3 bare multisig with exactly the shape <code>OP_1 pk1 pk2 pk3 OP_3 OP_CHECKMULTISIG</code>.</li>
+        <li>Recognise all five burn keys, and require keyburn for multisig-carried SRC-20.</li>
+        <li>Take 31 data bytes per data public key as <code>pubkey[1:-1]</code>, in output order.</li>
+        <li>ARC4-decrypt with the byte-reversed txid of the output spent by input 0.</li>
+        <li>Decode OLGA P2WSH from outputs at index above 0, at height 865000 and above.</li>
+        <li>Strip trailing zero padding from the concatenated OLGA buffer.</li>
+        <li>Read the two-byte big-endian length, check the <code>stamp:</code> prefix, and reject a buffer shorter than the declared length.</li>
+        <li>Give OLGA precedence, with <strong>no</strong> multisig fallback when it fails.</li>
+        <li>Derive the creator from input 0's previous output and the destination from output 0.</li>
+      </ul>
+
+      <h3>Payload</h3>
+      <ul>
+        <li>Reject unquoted exponent literals during JSON parsing.</li>
+        <li>Compare <code>p</code> case-insensitively against <code>src-20</code>.</li>
+        <li>Uppercase <code>op</code> before dispatch, and accept only DEPLOY, MINT and TRANSFER.</li>
+        <li>Normalise empty strings to absent.</li>
+        <li>Treat required-field checks as a superset test, and do not reject unknown extra fields.</li>
+      </ul>
+
+      <h3>Ticker</h3>
+      <ul>
+        <li>Re-decode Latin-1 to UTF-8 where that succeeds.</li>
+        <li>Enforce a maximum of 5 <em>code points</em>, not bytes.</li>
+        <li>Check every character against the exact ASCII set and the exact emoji allowlist.</li>
+        <li>Lowercase before every comparison, and compute the SHA3-256 tick hash from the lowercased form.</li>
+      </ul>
+
+      <h3>Numbers</h3>
+      <ul>
+        <li>Enforce the range 0 to 18446744073709551615, and reject NaN.</li>
+        <li>Apply the numeric regex, and remember which failures exclude and which merely invalidate.</li>
+        <li>Truncate <code>max</code> and <code>lim</code> down to integers. <strong>Do not</strong> truncate <code>amt</code>.</li>
+        <li>Enforce <code>dec</code> in 0 to 18, defaulting to 18 when absent.</li>
+        <li>Compare <code>amt</code>'s decimal places against <code>dec</code> after normalising away trailing zeros.</li>
+        <li>Apply the pre-833000 digit-and-dot stripping when replaying historical blocks.</li>
+      </ul>
+
+      <h3>State</h3>
+      <ul>
+        <li>First deploy wins, in block-then-transaction order.</li>
+        <li>Reject a DEPLOY whose <code>max</code> or <code>lim</code> is missing or zero, with status <code>DE</code>.</li>
+        <li>Use <code>min(lim, max)</code> as the effective per-mint limit.</li>
+        <li>Clamp to remaining supply, then to the per-mint limit, and keep the mint <strong>valid</strong>.</li>
+        <li>Reject a mint only when total minted is already at or above <code>max</code>.</li>
+        <li>Reject a transfer outright when the running balance is short. No partial fills.</li>
+        <li>Maintain running balances and mint totals within a block.</li>
+        <li>Ignore Counterparty-encoded SRC-20 at and above height 796000.</li>
+      </ul>
+
+      <h3>Operations</h3>
+      <ul>
+        <li>Compute a per-block ledger hash and compare it against an independent implementation.</li>
+        <li>Roll back and re-derive on reorg, over-rewinding rather than patching.</li>
+        <li>Publish invalidations to consumers before publishing replacement state.</li>
+        <li>Refuse reorgs at or below your finality depth.</li>
+        <li>Expose no pending or mempool balance.</li>
+      </ul>
+    </section>
+
+    <nav class="page-nav" aria-label="Page">
+      <a href="guide.html">&larr; Guide</a>
+      <a href="vectors.html">Test vectors &rarr;</a>
+    </nav>
+
+  </div>
 </main>
-<footer><div class="wrap footer-inner"><span>Stamps, SRC-20 & SRC-101 on Bitcoin</span><span>Presented by <a href="https://github.com/bitcoinuniverse/src-20">Bitcoin Universe</a></span></div></footer></body></html>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Documentation</h2>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="specification.html">Specification</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="vectors.html">Test vectors</a></li>
+          <li><a href="validator.html">Validator</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://docs.bitcoinuniverse.io">Bitcoin Universe docs portal</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20">Source repository</a></li>
+          <li><a href="https://github.com/stampchain-io/btc_stamps">Bitcoin Stamps indexer</a></li>
+          <li><a href="https://stampchain.io/">Stampchain explorer</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This document</h2>
+        <dl class="footer-meta">
+          <dt>Owning repository</dt><dd>bitcoinuniverseio/src-20</dd>
+          <dt>Source path</dt><dd><code>reference.html</code></dd>
+          <dt>Spec version</dt><dd>2026.09.01</dd>
+          <dt>Lifecycle</dt><dd>Stable</dd>
+          <dt>Chain / network</dt><dd>Bitcoin mainnet</dd>
+          <dt>Last verified</dt><dd><time datetime="2026-09-01">1 September 2026</time></dd>
+        </dl>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>SRC-20 originated in the Bitcoin Stamps community. This site documents it; it does not own it.</span>
+      <a href="https://github.com/bitcoinuniverseio/src-20/edit/main/reference.html">Edit this page on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

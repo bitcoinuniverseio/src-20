@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRC-20 test vectors</title>
+<meta name="description" content="Valid and invalid SRC-20 test vectors with the outcome an indexer must produce, covering carrier framing, payload validation, ticker and numeric rules, the clamping mints, and a full stateful token lifecycle.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/src-20/vectors.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="search-index" href="search-index.json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SRC-20 test vectors">
+<meta property="og:description" content="Valid and invalid vectors with expected outcomes, derived from the Bitcoin Stamps indexer.">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/src-20/vectors.html">
+<meta property="og:image" content="https://bitcoinuniverseio.github.io/src-20/assets/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('src20-docs-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 34" aria-hidden="true" focusable="false">
+        <rect x="1" y="2" width="28" height="30" rx="1" fill="var(--accent)"/>
+        <g fill="var(--paper)">
+          <circle cx="1" cy="2" r="1.7"/><circle cx="8" cy="2" r="1.7"/><circle cx="15" cy="2" r="1.7"/><circle cx="22" cy="2" r="1.7"/><circle cx="29" cy="2" r="1.7"/>
+          <circle cx="1" cy="32" r="1.7"/><circle cx="8" cy="32" r="1.7"/><circle cx="15" cy="32" r="1.7"/><circle cx="22" cy="32" r="1.7"/><circle cx="29" cy="32" r="1.7"/>
+          <circle cx="1" cy="9.5" r="1.7"/><circle cx="1" cy="17" r="1.7"/><circle cx="1" cy="24.5" r="1.7"/>
+          <circle cx="29" cy="9.5" r="1.7"/><circle cx="29" cy="17" r="1.7"/><circle cx="29" cy="24.5" r="1.7"/>
+        </g>
+        <text x="15" y="21" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="var(--on-accent)">20</text>
+      </svg>
+      <span>SRC-20</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="specification.html">Specification</a></li>
+        <li><a href="guide.html">Guide</a></li>
+        <li><a href="reference.html">Reference</a></li>
+        <li><a href="vectors.html" aria-current="page">Test vectors</a></li>
+        <li><a href="validator.html">Validator</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <form class="search" id="site-search" role="search" hidden>
+        <label class="visually-hidden" for="q">Search the SRC-20 documentation</label>
+        <input class="search-input" id="q" type="search" placeholder="Search (press /)" autocomplete="off">
+        <ul class="search-results" id="search-results" aria-live="polite"></ul>
+      </form>
+      <button class="theme-toggle" id="theme-toggle" type="button" hidden>Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="hero">
+      <p class="eyebrow">Test vectors &middot; Strict numeric rules, height 833000 and above</p>
+      <h1>SRC-20 test vectors</h1>
+      <p class="lede">Every vector below states the outcome the reference indexer produces and the rule that decides it. Outcomes are one of three: <strong>valid</strong>, <strong>invalid</strong> with a status code, or <strong>excluded</strong> with no record at all.</p>
+    </div>
+
+    <div class="note">
+      <span class="note-title">The three outcomes</span>
+      <dl class="terms" style="margin-top:.4rem">
+        <dt><span class="badge badge-valid">Valid</span></dt>
+        <dd>Recorded and state changes. Note that a clamped mint is in this category.</dd>
+        <dt><span class="badge badge-invalid">Invalid</span></dt>
+        <dd>Recorded with a status code, appears in activity feeds, changes no balance.</dd>
+        <dt><span class="badge badge-neutral">Excluded</span></dt>
+        <dd>Never becomes an SRC-20 record. No status code, appears nowhere.</dd>
+      </dl>
+    </div>
+
+    <div class="toc">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#framing">Carrier framing vectors</a></li>
+        <li><a href="#valid">Valid payloads</a></li>
+        <li><a href="#excluded">Excluded payloads</a></li>
+        <li><a href="#invalid">Invalid payloads</a></li>
+        <li><a href="#tickers">Ticker vectors</a></li>
+        <li><a href="#lifecycle">Stateful lifecycle</a></li>
+        <li><a href="#historical">Historical behaviour</a></li>
+      </ol>
+    </div>
+
+    <hr class="perf">
+
+    <section id="framing" class="prose-wide">
+      <h2>1. Carrier framing vectors</h2>
+      <p>Given a JSON payload, the framed buffer is a two-byte big-endian length, then <code>stamp:</code>, then the JSON. The length covers the prefix and the JSON, not itself.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Framing, computed from the payloads in the guide</caption>
+          <thead><tr><th scope="col">Payload</th><th scope="col">JSON bytes</th><th scope="col">Length prefix</th><th scope="col">Framed total</th><th scope="col">OLGA outputs</th><th scope="col">Multisig outputs</th></tr></thead>
+          <tbody>
+            <tr><td><code>DEPLOY PLATE</code></td><td>83</td><td><code>0059</code> (89)</td><td>91</td><td>3</td><td>2</td></tr>
+            <tr><td><code>MINT PLATE</code></td><td>54</td><td><code>003c</code> (60)</td><td>62</td><td>2</td><td>1</td></tr>
+            <tr><td><code>TRANSFER PLATE</code></td><td>59</td><td><code>0041</code> (65)</td><td>67</td><td>3</td><td>2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Vector F-1: the first 32 bytes of a framed DEPLOY</h3>
+      <p>Payload: <code>{"p":"src-20","op":"DEPLOY","tick":"PLATE","max":"21000000","lim":"1000","dec":"8"}</code></p>
+      <pre><code>00 59 73 74 61 6d 70 3a 7b 22 70 22 3a 22 73 72
+63 2d 32 30 22 2c 22 6f 70 22 3a 22 44 45 50 4c</code></pre>
+      <p class="small muted">Bytes 0 to 1 are the length, 89. Bytes 2 to 7 are <code>stamp:</code>. Byte 8 onward is the JSON. Under OLGA this becomes 3 P2WSH witness programs with 5 zero bytes of padding on the last; under bare multisig it is ARC4-encrypted first, then split into 3 data public keys of 31 bytes.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Carrier acceptance</caption>
+          <thead><tr><th scope="col">Vector</th><th scope="col">Condition</th><th scope="col">Outcome</th><th scope="col">Rule</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">F-2</th><td>1-of-3 multisig, third key is a recognised burn key</td><td><span class="badge badge-valid">Decodes</span></td><td>E-1, E-2</td></tr>
+            <tr><th scope="row">F-3</th><td>1-of-3 multisig, third key is an ordinary public key</td><td><span class="badge badge-neutral">Excluded</span>, keyburn not set</td><td>E-2, X-1</td></tr>
+            <tr><th scope="row">F-4</th><td>2-of-3 multisig carrying otherwise valid data</td><td><span class="badge badge-neutral">Excluded</span>, wrong script shape</td><td>E-1</td></tr>
+            <tr><th scope="row">F-5</th><td>Declared length 200, only 91 bytes present</td><td><span class="badge badge-neutral">Excluded</span>, invalid data length</td><td>E-6, X-2</td></tr>
+            <tr><th scope="row">F-6</th><td>Decrypted bytes 2 to 7 are not <code>stamp:</code></td><td><span class="badge badge-neutral">Excluded</span>, not a Stamps transaction</td><td>E-5</td></tr>
+            <tr><th scope="row">F-7</th><td>P2WSH data output at index 0</td><td><span class="badge badge-neutral">Excluded</span> as data; output 0 is always the recipient</td><td>E-8</td></tr>
+            <tr><th scope="row">F-8</th><td>P2WSH data present but its prefix check fails, valid multisig data also present</td><td><span class="badge badge-neutral">Excluded</span>. The multisig branch is <strong>not</strong> tried.</td><td>E-12, X-3</td></tr>
+            <tr><th scope="row">F-9</th><td>OLGA P2WSH transaction below block 865000</td><td><span class="badge badge-neutral">Excluded</span>, carrier not yet active for SRC-20</td><td>E-8</td></tr>
+            <tr><th scope="row">F-10</th><td>Counterparty-encoded SRC-20 at block 800000</td><td><span class="badge badge-neutral">Excluded</span>, at or above 796000</td><td>CP-3, X-4</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note note-warn">
+        <span class="note-title">F-8 is the one that forks ledgers</span>
+        <p>It is tempting to fall back to the multisig branch when the P2WSH data fails. The reference implementation deliberately does not, and the exclusion is load-bearing: it matches the other reference implementation in the ecosystem. Adding the fallback produces a different set of valid transactions and a different ledger.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="valid" class="prose-wide">
+      <h2>2. Valid payloads</h2>
+      <p>Each of these passes every field-level rule. Whether it changes state also depends on chain state, noted where relevant.</p>
+
+      <div class="vector panel">
+        <h3>V-1 <span class="badge badge-valid">Valid</span> Standard DEPLOY</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"PLATE","max":"21000000","lim":"1000","dec":"8"}</code></pre>
+        <p class="small">Creates <code>plate</code> with 8 decimals, if no earlier deploy exists. Ticker is 5 code points, the maximum.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>V-2 <span class="badge badge-valid">Valid</span> DEPLOY without <code>dec</code></h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"NODEC","max":"1000","lim":"10"}</code></pre>
+        <p class="small"><strong>Deploys with 18 decimals, not 0.</strong> The default is 18. This is a common and expensive misreading. Rule N-5.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>V-3 <span class="badge badge-valid">Valid</span> Mixed case in <code>p</code> and <code>op</code></h3>
+        <pre><code>{"p":"SRC-20","op":"deploy","tick":"CaSe","max":5,"lim":1}</code></pre>
+        <p class="small"><code>p</code> is compared case-insensitively, <code>op</code> is uppercased, and the ticker is lowercased to <code>case</code>. Numeric values as JSON numbers rather than strings are accepted. Rules P-3, P-4, T-4, P-7.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>V-4 <span class="badge badge-valid">Valid</span> Fractional <code>max</code> and <code>lim</code>, truncated</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"TRUNC","max":"1000.9","lim":"10.75","dec":"0"}</code></pre>
+        <p class="small">Deploys with <code>max</code> 1000 and <code>lim</code> 10. Both are truncated downward. Rule N-3.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>V-5 <span class="badge badge-valid">Valid</span> Amount at the numeric ceiling</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"MAXED","amt":"18446744073709551615"}</code></pre>
+        <p class="small">Exactly 2<sup>64</sup> minus 1, which is inside the range. One more would be excluded. Rule N-1.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>V-6 <span class="badge badge-valid">Valid</span> Trailing zeros in <code>amt</code></h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"DEC1","amt":"1.500"}</code></pre>
+        <p class="small">Against a token with <code>dec</code> 1 this is valid: the amount normalises to <code>1.5</code>, which is one decimal place. Trailing zeros do not count. Rule N-7.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>V-7 <span class="badge badge-valid">Valid</span> Unknown extra fields</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"META","max":"1","lim":"1",
+ "web":"https://example.invalid","desc":"an example","nonsense":42}</code></pre>
+        <p class="small">Field presence is a superset test. <code>web</code> and <code>desc</code> are stored as metadata with no protocol effect; <code>nonsense</code> is carried and ignored. Rule P-5.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>V-8 <span class="badge badge-valid">Valid</span> Emoji ticker</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"🔥","amt":"1"}</code></pre>
+        <p class="small">U+1F525 is in the allowlist. One code point of a permitted five, occupying 4 bytes. Rule T-3.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="excluded" class="prose-wide">
+      <h2>3. Excluded payloads</h2>
+      <p>These never become SRC-20 records. There is no status code to look up, and nothing appears in any feed.</p>
+
+      <div class="vector panel">
+        <h3>E-1 <span class="badge badge-neutral">Excluded</span> Unquoted scientific notation</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"SCI","max":1e6,"lim":1000}</code></pre>
+        <p class="small">The JSON parser raises on the exponent literal before any SRC-20 logic runs. Rule P-2.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>E-2 <span class="badge badge-neutral">Excluded</span> Thousands separators</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"COMMA","max":"21,000,000","lim":"1,000"}</code></pre>
+        <p class="small">At or above height 833000 the string is not readable as a decimal. <strong>Below 833000 this same payload deployed a supply of 21000000</strong>, because every character that was not a digit or a dot was stripped first. Rules N-2, N-6.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>E-3 <span class="badge badge-neutral">Excluded</span> Ticker too long</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"TOOLONG","amt":"1"}</code></pre>
+        <p class="small">7 code points against a limit of 5. Rule T-1.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>E-4 <span class="badge badge-neutral">Excluded</span> Ticker with a disallowed character</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"A-B","amt":"1"}</code></pre>
+        <p class="small">The hyphen is not in the allowed set, and neither is a space, comma, plus, slash, colon, quote or bracket. Rule T-2.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>E-5 <span class="badge badge-neutral">Excluded</span> Wrong protocol string</h3>
+        <pre><code>{"p":"brc-20","op":"deploy","tick":"ordi","max":"21000000","lim":"1000"}</code></pre>
+        <p class="small">A BRC-20 payload placed in a Stamps carrier. Also excluded: <code>"p":"src20"</code> without the hyphen. Rule P-3.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>E-6 <span class="badge badge-neutral">Excluded</span> Amount above the ceiling</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"BIG","amt":"18446744073709551616"}</code></pre>
+        <p class="small">One above 2<sup>64</sup> minus 1. Rule N-1.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>E-7 <span class="badge badge-neutral">Excluded</span> Negative amount</h3>
+        <pre><code>{"p":"src-20","op":"TRANSFER","tick":"NEG","amt":"-5"}</code></pre>
+        <p class="small">Outside the permitted range of 0 to the uint64 maximum. Rule N-1.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>E-8 <span class="badge badge-neutral">Excluded</span> Malformed JSON</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"BAD","amt":}</code></pre>
+        <p class="small">A parse failure excludes the transaction silently. Rule P-1.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="invalid" class="prose-wide">
+      <h2>4. Invalid payloads</h2>
+      <p>These are recognised, recorded, and given a status code. They appear in activity feeds and change no balance.</p>
+
+      <div class="vector panel">
+        <h3>I-1 <span class="badge badge-invalid">Invalid</span> <code>UO</code> Unsupported operation</h3>
+        <pre><code>{"p":"src-20","op":"BULK_XFER","tick":"PLATE","amt":"1","destinations":[]}</code></pre>
+        <p class="small">The reference indexer contains a <code>handle_bulk_transfer</code> implementation, but dispatch matches only DEPLOY, MINT and TRANSFER, so the code is unreachable and this lands on the unsupported-operation branch. Rule P-4.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>I-2 <span class="badge badge-invalid">Invalid</span> <code>NN</code> Quoted exponent</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"QEXP","max":"1e6","lim":"1000"}</code></pre>
+        <p class="small">Worth contrasting with E-1. Quoted, a decimal parser reads it, so the carrier check passes and the payload becomes a record; it then fails the stricter numeric regex and is marked <code>NN</code>. Unquoted, it is excluded before any of that. Rule N-2.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>I-3 <span class="badge badge-invalid">Invalid</span> <code>NN</code> Decimals out of range</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"DEC25","max":"1000","lim":"10","dec":"25"}</code></pre>
+        <p class="small">Above the maximum of 18. Rule N-5.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>I-4 <span class="badge badge-invalid">Invalid</span> <code>DE</code> DEPLOY missing <code>lim</code></h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"NOLIM","max":"1000"}</code></pre>
+        <p class="small"><strong>The status message reads "DEPLOY EXISTS" even though no earlier deploy exists.</strong> The condition that produces <code>DE</code> covers both a taken ticker and a missing or zero <code>max</code> or <code>lim</code>. Do not read the message literally. Rule V-1.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>I-5 <span class="badge badge-invalid">Invalid</span> <code>DE</code> Zero supply</h3>
+        <pre><code>{"p":"src-20","op":"DEPLOY","tick":"ZERO","max":"0","lim":"1"}</code></pre>
+        <p class="small">Both <code>max</code> and <code>lim</code> must be non-zero after truncation. Rule V-1.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>I-6 <span class="badge badge-invalid">Invalid</span> <code>NA</code> Missing amount</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"PLATE"}</code></pre>
+        <p class="small">Also produced by <code>"amt":""</code>, since an empty string normalises to absent. Rules P-6, and the <code>NA</code> row of the status table.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>I-7 <span class="badge badge-invalid">Invalid</span> <code>ID</code> Too many decimal places</h3>
+        <pre><code>{"p":"src-20","op":"TRANSFER","tick":"WHOLE","amt":"1.5"}</code></pre>
+        <p class="small">Against a token deployed with <code>dec</code> 0. Against a token with <code>dec</code> 8 the same payload is valid. Rule N-7.</p>
+      </div>
+
+      <div class="vector panel">
+        <h3>I-8 <span class="badge badge-invalid">Invalid</span> <code>ND</code> No deploy</h3>
+        <pre><code>{"p":"src-20","op":"MINT","tick":"GHOST","amt":"1"}</code></pre>
+        <p class="small">Where <code>ghost</code> has never been deployed. Rule V-4.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="tickers" class="prose-wide">
+      <h2>5. Ticker vectors</h2>
+      <div class="table-scroll">
+        <table>
+          <caption>Ticker acceptance</caption>
+          <thead><tr><th scope="col">Ticker</th><th scope="col">Code points</th><th scope="col">Outcome</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+            <tr><td><code>A</code></td><td>1</td><td><span class="badge badge-valid">Accepted</span></td><td>Minimum length is 1.</td></tr>
+            <tr><td><code>PLATE</code></td><td>5</td><td><span class="badge badge-valid">Accepted</span></td><td>Exactly at the limit.</td></tr>
+            <tr><td><code>plate</code></td><td>5</td><td><span class="badge badge-valid">Accepted</span></td><td>Same token as <code>PLATE</code>. Tickers are case-insensitive.</td></tr>
+            <tr><td><code>K3V!N</code></td><td>5</td><td><span class="badge badge-valid">Accepted</span></td><td>Digits and <code>!</code> are in the ASCII set.</td></tr>
+            <tr><td><code>~#$%^</code></td><td>5</td><td><span class="badge badge-valid">Accepted</span></td><td>All five are in the ASCII set.</td></tr>
+            <tr><td><code>🔥</code></td><td>1</td><td><span class="badge badge-valid">Accepted</span></td><td>U+1F525 is in the emoji allowlist.</td></tr>
+            <tr><td><code>🔥🔥🔥🔥🔥</code></td><td>5</td><td><span class="badge badge-valid">Accepted</span></td><td>5 code points, 20 bytes. The limit counts code points.</td></tr>
+            <tr><td><code>STAMPS</code></td><td>6</td><td><span class="badge badge-neutral">Excluded</span></td><td>Over the 5 code point limit.</td></tr>
+            <tr><td><code>A B</code></td><td>3</td><td><span class="badge badge-neutral">Excluded</span></td><td>Space is not in the set.</td></tr>
+            <tr><td><code>A-B</code></td><td>3</td><td><span class="badge badge-neutral">Excluded</span></td><td>Hyphen is not in the set.</td></tr>
+            <tr><td><code>A+B</code></td><td>3</td><td><span class="badge badge-neutral">Excluded</span></td><td>Plus is not in the set.</td></tr>
+            <tr><td><code>A,B</code></td><td>3</td><td><span class="badge badge-neutral">Excluded</span></td><td>Comma is not in the set.</td></tr>
+            <tr><td>(empty)</td><td>0</td><td><span class="badge badge-neutral">Excluded</span></td><td>A ticker must be non-empty.</td></tr>
+            <tr><td>Flag or family emoji</td><td>2 or more</td><td><span class="badge badge-neutral">Excluded</span></td><td>Composed sequences use joiners and modifiers that are not in the allowlist, which contains single code points only.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">The allowed ASCII set is exactly <code>.!#$%&amp;()*0123456789&lt;=&gt;?@A-Z^_a-z~</code>, and the emoji allowlist holds 1154 single code points between U+1F004 and U+1FAD6.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="lifecycle" class="prose-wide">
+      <h2>6. Stateful lifecycle</h2>
+      <p>The vectors above test a payload in isolation. This one tests the state machine. Every row is applied in order to a fresh index.</p>
+
+      <p><strong>Token:</strong> <code>plate</code>, <code>max</code> 1000, <code>lim</code> 400, <code>dec</code> 0. Addresses are labelled A, B, C and D.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Applied in order. "Minted" is the running total for the token.</caption>
+          <thead>
+            <tr><th scope="col">#</th><th scope="col">Operation</th><th scope="col">Output 0</th><th scope="col">Outcome</th><th scope="col">Credited</th><th scope="col">Minted after</th><th scope="col">Balances after</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-narrow">1</td>
+              <td><code>DEPLOY max=1000 lim=400 dec=0</code></td><td>A</td>
+              <td><span class="badge badge-valid">Valid</span></td><td>&ndash;</td><td>0</td><td>all zero</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">2</td>
+              <td><code>MINT amt=400</code></td><td>A</td>
+              <td><span class="badge badge-valid">Valid</span></td><td>400</td><td>400</td><td>A 400</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">3</td>
+              <td><code>MINT amt=500</code></td><td>B</td>
+              <td><span class="badge badge-valid">Valid</span>, status <code>ODL</code></td><td><strong>400</strong>, clamped to <code>lim</code></td><td>800</td><td>A 400, B 400</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">4</td>
+              <td><code>MINT amt=400</code></td><td>C</td>
+              <td><span class="badge badge-valid">Valid</span>, status <code>OMA</code></td><td><strong>200</strong>, clamped to remaining supply</td><td>1000</td><td>A 400, B 400, C 200</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">5</td>
+              <td><code>MINT amt=1</code></td><td>D</td>
+              <td><span class="badge badge-invalid">Invalid</span>, status <code>OM</code></td><td>nothing</td><td>1000</td><td>unchanged</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">6</td>
+              <td><code>TRANSFER amt=100</code> from A</td><td>B</td>
+              <td><span class="badge badge-valid">Valid</span></td><td>100 moved</td><td>1000</td><td>A 300, B 500, C 200</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">7</td>
+              <td><code>TRANSFER amt=1000</code> from A</td><td>C</td>
+              <td><span class="badge badge-invalid">Invalid</span>, status <code>BB</code></td><td>nothing, no partial fill</td><td>1000</td><td>unchanged</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">8</td>
+              <td><code>TRANSFER amt=300</code> from A</td><td>A</td>
+              <td><span class="badge badge-valid">Valid</span></td><td>self-transfer, no net change</td><td>1000</td><td>unchanged</td>
+            </tr>
+            <tr>
+              <td class="col-narrow">9</td>
+              <td><code>DEPLOY plate</code> again</td><td>D</td>
+              <td><span class="badge badge-invalid">Invalid</span>, status <code>DE</code></td><td>nothing</td><td>1000</td><td>unchanged</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note note-warn">
+        <span class="note-title">Rows 3, 4 and 5 are the whole test</span>
+        <p>An implementation that gets these three right almost certainly agrees with the reference on everything else. Rows 3 and 4 are <strong>valid</strong> mints that credited less than the payload asked for. Row 5 is the only genuinely failed mint, and it fails because the supply was already exhausted, not because the amount was wrong.</p>
+        <p>If your indexer marks rows 3 and 4 invalid, your circulating supply for this token will read 400 instead of 1000.</p>
+      </div>
+
+      <h3>Ordering within a block</h3>
+      <p>If rows 6 and 7 were both in the same block, the outcome is unchanged: the running balance already reflects row 6 when row 7 is evaluated. If their order were reversed, row 7 would still fail, because A held 400 and the transfer was for 1000. But had row 7 been for 400, order would decide: first in block order succeeds, the other fails with <code>BB</code>.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="historical" class="prose-wide">
+      <h2>7. Historical behaviour</h2>
+      <p>These vectors have a different outcome depending on block height. An indexer replaying history must reproduce both.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Height-dependent outcomes</caption>
+          <thead><tr><th scope="col">Vector</th><th scope="col">Below 833000</th><th scope="col">At or above 833000</th></tr></thead>
+          <tbody>
+            <tr>
+              <th scope="row"><code>"max":"21,000,000"</code></th>
+              <td><span class="badge badge-valid">Valid</span>, read as 21000000 after stripping</td>
+              <td><span class="badge badge-neutral">Excluded</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><code>"amt":"1 000"</code></th>
+              <td><span class="badge badge-valid">Valid</span>, read as 1000</td>
+              <td><span class="badge badge-neutral">Excluded</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><code>"lim":"abc500"</code></th>
+              <td><span class="badge badge-valid">Valid</span>, read as 500</td>
+              <td><span class="badge badge-neutral">Excluded</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Carrier availability by height</caption>
+          <thead><tr><th scope="col">Vector</th><th scope="col">Height</th><th scope="col">Outcome</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Counterparty-encoded SRC-20, numeric asset, supply 0</th><td>790000</td><td><span class="badge badge-valid">Recognised</span></td></tr>
+            <tr><th scope="row">Counterparty-encoded SRC-20, same shape</th><td>796000</td><td><span class="badge badge-neutral">Excluded</span>, at the cutoff</td></tr>
+            <tr><th scope="row">Counterparty-encoded SRC-20, named asset not starting with <code>A</code></th><td>790000</td><td><span class="badge badge-neutral">Excluded</span></td></tr>
+            <tr><th scope="row">Direct-to-Bitcoin multisig SRC-20</th><td>793068 onward</td><td><span class="badge badge-valid">Recognised</span></td></tr>
+            <tr><th scope="row">OLGA P2WSH SRC-20</th><td>864999</td><td><span class="badge badge-neutral">Excluded</span>, carrier not yet active</td></tr>
+            <tr><th scope="row">OLGA P2WSH SRC-20</th><td>865000 onward</td><td><span class="badge badge-valid">Recognised</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="small muted">Try any payload vector from this page in the <a href="validator.html">validator</a>. It applies the strict rules, that is, height 833000 and above.</p>
+    </section>
+
+    <nav class="page-nav" aria-label="Page">
+      <a href="reference.html">&larr; Reference</a>
+      <a href="validator.html">Validator &rarr;</a>
+    </nav>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Documentation</h2>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="specification.html">Specification</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="vectors.html">Test vectors</a></li>
+          <li><a href="validator.html">Validator</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://docs.bitcoinuniverse.io">Bitcoin Universe docs portal</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20">Source repository</a></li>
+          <li><a href="https://github.com/stampchain-io/btc_stamps">Bitcoin Stamps indexer</a></li>
+          <li><a href="https://stampchain.io/">Stampchain explorer</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This document</h2>
+        <dl class="footer-meta">
+          <dt>Owning repository</dt><dd>bitcoinuniverseio/src-20</dd>
+          <dt>Source path</dt><dd><code>vectors.html</code></dd>
+          <dt>Spec version</dt><dd>2026.09.01</dd>
+          <dt>Lifecycle</dt><dd>Stable</dd>
+          <dt>Chain / network</dt><dd>Bitcoin mainnet</dd>
+          <dt>Last verified</dt><dd><time datetime="2026-09-01">1 September 2026</time></dd>
+        </dl>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>SRC-20 originated in the Bitcoin Stamps community. This site documents it; it does not own it.</span>
+      <a href="https://github.com/bitcoinuniverseio/src-20/edit/main/vectors.html">Edit this page on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>
