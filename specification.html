@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRC-20 specification | Bitcoin Stamps fungible tokens</title>
+<meta name="description" content="Normative SRC-20 rules: the unprunable data carrier, bare multisig and OLGA P2WSH encoding, ticker and numeric rules, DEPLOY, MINT and TRANSFER field tables, and every validity and invalidity condition the Bitcoin Stamps indexer enforces.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/src-20/specification.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="search-index" href="search-index.json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SRC-20 specification">
+<meta property="og:description" content="The normative SRC-20 rules, grounded in the Bitcoin Stamps indexer: carrier, encoding, ticker rules, operations, validity.">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/src-20/specification.html">
+<meta property="og:image" content="https://bitcoinuniverseio.github.io/src-20/assets/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<script>try{var t=localStorage.getItem('src20-docs-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 34" aria-hidden="true" focusable="false">
+        <rect x="1" y="2" width="28" height="30" rx="1" fill="var(--accent)"/>
+        <g fill="var(--paper)">
+          <circle cx="1" cy="2" r="1.7"/><circle cx="8" cy="2" r="1.7"/><circle cx="15" cy="2" r="1.7"/><circle cx="22" cy="2" r="1.7"/><circle cx="29" cy="2" r="1.7"/>
+          <circle cx="1" cy="32" r="1.7"/><circle cx="8" cy="32" r="1.7"/><circle cx="15" cy="32" r="1.7"/><circle cx="22" cy="32" r="1.7"/><circle cx="29" cy="32" r="1.7"/>
+          <circle cx="1" cy="9.5" r="1.7"/><circle cx="1" cy="17" r="1.7"/><circle cx="1" cy="24.5" r="1.7"/>
+          <circle cx="29" cy="9.5" r="1.7"/><circle cx="29" cy="17" r="1.7"/><circle cx="29" cy="24.5" r="1.7"/>
+        </g>
+        <text x="15" y="21" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="var(--on-accent)">20</text>
+      </svg>
+      <span>SRC-20</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="specification.html" aria-current="page">Specification</a></li>
+        <li><a href="guide.html">Guide</a></li>
+        <li><a href="reference.html">Reference</a></li>
+        <li><a href="vectors.html">Test vectors</a></li>
+        <li><a href="validator.html">Validator</a></li>
+      </ul>
+    </nav>
+    <div class="header-tools">
+      <form class="search" id="site-search" role="search" hidden>
+        <label class="visually-hidden" for="q">Search the SRC-20 documentation</label>
+        <input class="search-input" id="q" type="search" placeholder="Search (press /)" autocomplete="off">
+        <ul class="search-results" id="search-results" aria-live="polite"></ul>
+      </form>
+      <button class="theme-toggle" id="theme-toggle" type="button" hidden>Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="hero">
+      <p class="eyebrow">Normative specification &middot; Version 2026.09.01</p>
+      <h1>SRC-20 specification</h1>
+      <p class="lede">SRC-20 is a fungible token protocol on Bitcoin. Its operations are plain JSON documents embedded in <strong>transaction output scripts</strong>, which every full node must keep, rather than in witness data that a node is free to discard.</p>
+    </div>
+
+    <div class="note">
+      <span class="note-title">How to read this document</span>
+      <p>Every rule below is numbered and traceable to the implementation that enforces it. The reference implementation is the Bitcoin Stamps indexer, <a href="https://github.com/stampchain-io/btc_stamps"><code>stampchain-io/btc_stamps</code></a>; the constants quoted here were read from <code>indexer/src/config.py</code>, <code>indexer/src/index_core/src20.py</code>, <code>indexer/src/index_core/transaction_utils.py</code>, <code>indexer/src/index_core/script.py</code> and <code>indexer/src/index_core/models.py</code> at indexer version 1.9.3.</p>
+      <p>SRC-20 has no formal standards body. In practice the protocol <em>is</em> what the indexers agree on, so where this document states a rule it names the code that produces it. Where implementations could reasonably differ, the document says so instead of inventing an answer.</p>
+    </div>
+
+    <div class="toc">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#scope">Scope and terminology</a></li>
+        <li><a href="#carrier">The data carrier</a></li>
+        <li><a href="#unprunable">Why the output script matters</a></li>
+        <li><a href="#encoding">Encoding rules</a></li>
+        <li><a href="#heights">Activation heights</a></li>
+        <li><a href="#payload">The JSON payload</a></li>
+        <li><a href="#ticker">Ticker rules</a></li>
+        <li><a href="#numbers">Numeric rules</a></li>
+        <li><a href="#operations">Operations</a></li>
+        <li><a href="#validity">Validity and state transitions</a></li>
+        <li><a href="#invalid">Invalidity conditions</a></li>
+        <li><a href="#counterparty">The Counterparty dependency</a></li>
+      </ol>
+    </div>
+
+    <hr class="perf">
+
+    <section id="scope" class="prose-wide">
+      <h2>1. Scope and terminology</h2>
+      <p>This document specifies how an indexer derives SRC-20 token state from the Bitcoin blockchain. It does not specify wallet behaviour, fee policy, or any marketplace protocol.</p>
+
+      <ul class="rules">
+        <li><span class="rule-id">S-1</span><div class="rule-body"><p>SRC-20 is defined on <strong>Bitcoin mainnet</strong> only. No testnet or signet deployment is recognised by the reference indexer.</p></div></li>
+        <li><span class="rule-id">S-2</span><div class="rule-body"><p>SRC-20 is an <strong>account ledger</strong>. A balance belongs to a Bitcoin address, not to a specific unspent output. Spending the output that carried an operation does not move, destroy, or otherwise affect the balance.</p></div></li>
+        <li><span class="rule-id">S-3</span><div class="rule-body"><p>The <dfn>creator</dfn> (sender) of an operation is the address that controls the output being spent by <strong>input 0</strong> of the transaction. Other inputs are irrelevant to protocol semantics.</p></div></li>
+        <li><span class="rule-id">S-4</span><div class="rule-body"><p>The <dfn>destination</dfn> (recipient) of an operation is the address encoded in <strong>output 0</strong> of the transaction. Later outputs carry data, not intent.</p></div></li>
+        <li><span class="rule-id">S-5</span><div class="rule-body"><p>SRC-20 is a sub-protocol of <a href="reference.html#stamps">Bitcoin Stamps</a>. It shares the Stamps data carrier and the <code>stamp:</code> prefix with SRC-721 and SRC-101, and is distinguished from them only by the <code>p</code> field of its JSON payload.</p></div></li>
+      </ul>
+
+      <p class="small muted">Rules S-3 and S-4 come from <code>get_tx_info()</code> in <code>transaction_utils.py</code>, which derives <code>source</code> from the previous output spent by <code>ctx.vin[0]</code> and <code>destination</code> from <code>ctx.vout[0].scriptPubKey</code>.</p>
+    </section>
+
+    <hr class="perf">
+
+    <section id="carrier" class="prose-wide">
+      <h2>2. The data carrier</h2>
+      <p>An SRC-20 operation is a UTF-8 JSON document. To put that document on Bitcoin, it is split across the <em>scripts of transaction outputs</em>. Two carriers exist. Both are still indexed; which one a transaction may use depends on its block height.</p>
+
+      <figure class="plate">
+        <p class="plate-title">Plate I &middot; Carrier A: bare multisig</p>
+        <div class="plate-scroll">
+        <svg class="dgm" viewBox="0 0 700 360" role="img" aria-labelledby="plate1-t plate1-d">
+          <title id="plate1-t">Bare multisig SRC-20 carrier</title>
+          <desc id="plate1-d">A Bitcoin transaction. Input zero determines the sender address and also supplies the ARC4 key. Output zero pays the recipient. Outputs one and above are one-of-three bare multisig scripts whose first two public keys carry 31 data bytes each and whose third public key is a recognised burn key. The concatenated data bytes are ARC4 decrypted, then read as a two byte big-endian length, the ASCII prefix "stamp:", and the JSON payload.</desc>
+
+          <text class="d-title" x="8" y="16">Transaction</text>
+
+          <rect class="d-box-accent" x="8" y="26" width="180" height="46"/>
+          <text class="d-label" x="18" y="44">input 0</text>
+          <text class="d-mono" x="18" y="60">prevout &rarr; sender address</text>
+
+          <rect class="d-box" x="8" y="80" width="180" height="40"/>
+          <text class="d-label" x="18" y="97">input 1..n (funding)</text>
+          <text class="d-label" x="18" y="112">no protocol meaning</text>
+
+          <rect class="d-box-accent" x="245" y="26" width="200" height="46"/>
+          <text class="d-label" x="255" y="44">output 0</text>
+          <text class="d-mono" x="255" y="60">recipient address</text>
+
+          <rect class="d-box" x="245" y="82" width="200" height="88"/>
+          <text class="d-label" x="255" y="99">output 1..n &middot; 1-of-3 multisig</text>
+          <rect class="d-box-accent" x="255" y="107" width="180" height="18"/>
+          <text class="d-mono" x="262" y="120">pubkey 1 &rarr; 31 data bytes</text>
+          <rect class="d-box-accent" x="255" y="128" width="180" height="18"/>
+          <text class="d-mono" x="262" y="141">pubkey 2 &rarr; 31 data bytes</text>
+          <rect class="d-box-warn" x="255" y="149" width="180" height="18"/>
+          <text class="d-mono" x="262" y="162">pubkey 3 = burn key</text>
+
+          <path class="d-arrow" d="M188 49 L243 49" marker-end="url(#ar1)"/>
+          <path class="d-arrow" d="M345 172 L345 196" marker-end="url(#ar1)"/>
+
+          <path class="d-line" d="M98 72 L98 138" stroke-dasharray="4 3"/>
+          <text class="d-label" x="14" y="156">ARC4 key =</text>
+          <text class="d-label" x="14" y="172">input 0 txid, byte-reversed</text>
+          <path class="d-line" d="M98 184 L98 218 L194 218" stroke-dasharray="4 3"/>
+
+          <rect class="d-box" x="200" y="200" width="290" height="36"/>
+          <text class="d-label" x="210" y="223">concatenated data bytes (ciphertext)</text>
+
+          <path class="d-arrow" d="M345 236 L345 262" marker-end="url(#ar1)"/>
+          <text class="d-label" x="352" y="256">ARC4 decrypt</text>
+
+          <rect class="d-box-accent" x="120" y="266" width="90" height="36"/>
+          <text class="d-mono" x="130" y="288">len (2 B)</text>
+          <rect class="d-box-accent" x="212" y="266" width="90" height="36"/>
+          <text class="d-mono" x="222" y="288">"stamp:"</text>
+          <rect class="d-box-accent" x="304" y="266" width="270" height="36"/>
+          <text class="d-mono" x="314" y="288">{"p":"SRC-20", ...}</text>
+
+          <text class="d-label" x="120" y="320">big-endian uint16</text>
+          <text class="d-label" x="212" y="320">6 ASCII bytes</text>
+          <text class="d-label" x="304" y="320">UTF-8 JSON, len minus 6 bytes</text>
+
+          <defs>
+            <marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="d-fill-accent"/>
+            </marker>
+          </defs>
+        </svg>
+        </div>
+        <figcaption>Carrier A. The sender address and the decryption key both come from input 0, which is what binds the payload to the spender. The third public key in each multisig output is a provably unusable burn key, which is how the indexer tells a data output from an ordinary payment.</figcaption>
+      </figure>
+
+      <figure class="plate">
+        <p class="plate-title">Plate II &middot; Carrier B: OLGA P2WSH</p>
+        <div class="plate-scroll">
+        <svg class="dgm" viewBox="0 0 700 250" role="img" aria-labelledby="plate2-t plate2-d">
+          <title id="plate2-t">OLGA pay-to-witness-script-hash SRC-20 carrier</title>
+          <desc id="plate2-d">A Bitcoin transaction where output zero pays the recipient and every later output is a pay-to-witness-script-hash output whose 32 byte witness program is raw payload data. The programs are concatenated, trailing zero padding is removed, and the result is read as a two byte big-endian length, the ASCII prefix "stamp:", and the JSON payload. No encryption is used.</desc>
+
+          <text class="d-title" x="8" y="16">Transaction outputs</text>
+
+          <rect class="d-box-accent" x="8" y="26" width="200" height="40"/>
+          <text class="d-label" x="18" y="43">output 0</text>
+          <text class="d-mono" x="18" y="58">recipient address</text>
+
+          <rect class="d-box" x="8" y="74" width="200" height="96"/>
+          <text class="d-label" x="18" y="91">output 1..n &middot; P2WSH</text>
+          <rect class="d-box-accent" x="18" y="99" width="180" height="18"/>
+          <text class="d-mono" x="25" y="112">witness program = 32 B data</text>
+          <rect class="d-box-accent" x="18" y="120" width="180" height="18"/>
+          <text class="d-mono" x="25" y="133">witness program = 32 B data</text>
+          <rect class="d-box-accent" x="18" y="141" width="180" height="18"/>
+          <text class="d-mono" x="25" y="154">... zero padded to 32 B</text>
+
+          <path class="d-arrow" d="M208 122 L258 122" marker-end="url(#ar2)"/>
+          <text class="d-label" x="214" y="114">concat, strip 0x00</text>
+
+          <rect class="d-box-accent" x="262" y="104" width="82" height="34"/>
+          <text class="d-mono" x="272" y="125">len (2 B)</text>
+          <rect class="d-box-accent" x="346" y="104" width="82" height="34"/>
+          <text class="d-mono" x="356" y="125">"stamp:"</text>
+          <rect class="d-box-accent" x="430" y="104" width="256" height="34"/>
+          <text class="d-mono" x="440" y="125">{"p":"SRC-20", ...}</text>
+
+          <text class="d-label" x="262" y="156">no ARC4: the bytes are plaintext</text>
+
+          <rect class="d-box-warn" x="8" y="186" width="678" height="46"/>
+          <text class="d-label" x="20" y="205">Precedence: if any qualifying P2WSH data output is present, the multisig branch is not attempted,</text>
+          <text class="d-label" x="20" y="221">even when the P2WSH length check fails. This exclusion is deliberate and consensus-load-bearing.</text>
+
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="d-fill-accent"/>
+            </marker>
+          </defs>
+        </svg>
+        </div>
+        <figcaption>Carrier B, known as OLGA. The payload sits in the 32-byte witness program of each P2WSH output. Nothing is encrypted, and the outputs are never spent, so the data stays in the UTXO set.</figcaption>
+      </figure>
+    </section>
+
+    <hr class="perf">
+
+    <section id="unprunable" class="prose-wide">
+      <h2>3. Why the output script matters</h2>
+      <p>This is the design claim that distinguishes SRC-20 from inscription-based token protocols such as BRC-20, and it is worth stating precisely rather than as a slogan.</p>
+
+      <figure class="plate">
+        <p class="plate-title">Plate III &middot; Where the bytes live</p>
+        <div class="plate-scroll">
+        <svg class="dgm" viewBox="0 0 700 220" role="img" aria-labelledby="plate3-t plate3-d">
+          <title id="plate3-t">Comparison of payload location</title>
+          <desc id="plate3-d">Two columns. On the left, an SRC-20 payload sits in the scriptPubKey of transaction outputs, which is part of the transaction identifier preimage and enters the unspent output set. On the right, an inscription payload sits in the witness of a transaction input, which is committed by the witness merkle root and may be discarded by a pruned or non-witness-serving node.</desc>
+
+          <rect class="d-box-accent" x="8" y="26" width="330" height="176"/>
+          <text class="d-title" x="20" y="46">SRC-20 &middot; output script</text>
+          <text class="d-label" x="20" y="68">Lives in scriptPubKey of an output.</text>
+          <text class="d-label" x="20" y="86">Committed by the legacy txid preimage.</text>
+          <text class="d-label" x="20" y="104">Enters the unspent transaction output set.</text>
+          <text class="d-label" x="20" y="122">Never spent, so it is never removed.</text>
+          <text class="d-label" x="20" y="140">Present in a block downloaded without</text>
+          <text class="d-label" x="20" y="156">witness data.</text>
+          <text class="d-label" x="20" y="182">Cost: permanent UTXO set growth.</text>
+
+          <rect class="d-box" x="358" y="26" width="330" height="176"/>
+          <text class="d-title" x="370" y="46">Inscription &middot; input witness</text>
+          <text class="d-label" x="370" y="68">Lives in the witness of a spending input.</text>
+          <text class="d-label" x="370" y="86">Committed by the witness merkle root.</text>
+          <text class="d-label" x="370" y="104">Not part of the UTXO set.</text>
+          <text class="d-label" x="370" y="122">A pruned node discards the block body;</text>
+          <text class="d-label" x="370" y="138">a node may serve blocks without witness.</text>
+          <text class="d-label" x="370" y="164">Cost: cheaper, at the witness discount.</text>
+        </svg>
+        </div>
+        <figcaption>Plate III. The practical difference is who is obliged to keep the bytes. Both payloads are equally committed by the block header, so neither can be forged after the fact.</figcaption>
+      </figure>
+
+      <ul class="rules">
+        <li><span class="rule-id">U-1</span><div class="rule-body"><p>SRC-20 payload bytes are part of an output's <code>scriptPubKey</code>. Any node that maintains a full unspent output set holds those bytes for as long as the outputs remain unspent, which in practice is forever, because the outputs are unspendable by construction.</p></div></li>
+        <li><span class="rule-id">U-2</span><div class="rule-body"><p>Neither carrier is spendable in practice. Under Carrier A the third public key of the multisig is a burn key nobody holds a private key for. Under Carrier B the 32 bytes are payload rather than the hash of any real script, so no witness can satisfy them.</p></div></li>
+        <li><span class="rule-id">U-3</span><div class="rule-body"><p>The honest statement of the tradeoff: SRC-20 buys durability by permanently enlarging every full node's UTXO set, and pays full non-witness transaction weight for the privilege. Inscriptions make the opposite trade. Neither payload can be altered after confirmation; the difference is the cost of guaranteed availability, not the strength of the commitment.</p></div></li>
+        <li><span class="rule-id">U-4</span><div class="rule-body"><p>A claim that inscription data "can be deleted" is too strong. Witness data is committed by the block header and is retained by every archival node. The accurate claim is that a validating node is <em>permitted</em> to discard it, while output scripts must be retained to validate future spends.</p></div></li>
+      </ul>
+    </section>
+
+    <hr class="perf">
+
+    <section id="encoding" class="prose-wide">
+      <h2>4. Encoding rules</h2>
+
+      <h3>4.1 Carrier A: bare multisig</h3>
+      <ul class="rules">
+        <li><span class="rule-id">E-1</span><div class="rule-body"><p>A data output is an output whose script assembles to exactly <code>OP_1 &lt;pk1&gt; &lt;pk2&gt; &lt;pk3&gt; OP_3 OP_CHECKMULTISIG</code>. Any other multisig shape is rejected by the decoder.</p></div></li>
+        <li><span class="rule-id">E-2</span><div class="rule-body"><p><code>pk3</code> must be one of five recognised burn keys. If it is, the transaction's <dfn>keyburn</dfn> flag is set to 1. <strong>An SRC-20 operation carried by multisig is only recognised when keyburn is 1.</strong> The recognised keys are:</p>
+          <pre><code>022222222222222222222222222222222222222222222222222222222222222222
+033333333333333333333333333333333333333333333333333333333333333333
+020202020202020202020202020202020202020202020202020202020202020202
+030303030303030303030303030303030303030303030303030303030303030302
+030303030303030303030303030303030303030303030303030303030303030303</code></pre></div></li>
+        <li><span class="rule-id">E-3</span><div class="rule-body"><p>Data bytes are taken from <code>pk1</code> and <code>pk2</code> of every data output, in output order, as <code>pubkey[1:-1]</code>. That is, the leading sign byte and the trailing byte of each 33-byte compressed key are dropped, yielding <strong>31 data bytes per public key</strong> and 62 per output.</p></div></li>
+        <li><span class="rule-id">E-4</span><div class="rule-body"><p>The concatenated bytes are decrypted with ARC4. <strong>The key is the txid of the output spent by input 0, in byte-reversed form</strong>, that is, the txid as normally displayed. This binds the payload to the specific input being spent.</p></div></li>
+        <li><span class="rule-id">E-5</span><div class="rule-body"><p>After decryption, bytes 2 through 7 must equal the ASCII prefix <code>stamp:</code>. If they do not, the transaction is not a Stamps transaction and is ignored.</p></div></li>
+        <li><span class="rule-id">E-6</span><div class="rule-body"><p>Bytes 0 and 1 are a big-endian unsigned 16-bit length covering the prefix and the payload. If the decrypted buffer is shorter than <code>2 + length</code>, decoding fails with an invalid-data-length error and the transaction is ignored.</p></div></li>
+        <li><span class="rule-id">E-7</span><div class="rule-body"><p>The payload is <code>chunk[8 : 2 + length]</code>, that is, everything after the prefix up to the declared length. Trailing bytes beyond the declared length are ignored.</p></div></li>
+      </ul>
+
+      <h3>4.2 Carrier B: OLGA P2WSH</h3>
+      <ul class="rules">
+        <li><span class="rule-id">E-8</span><div class="rule-body"><p>A data output is a P2WSH output, that is, a script of <code>OP_0 &lt;32 bytes&gt;</code>, at <strong>output index greater than 0</strong>, in a transaction at height 865000 or above. Output 0 is the recipient and is never treated as data.</p></div></li>
+        <li><span class="rule-id">E-9</span><div class="rule-body"><p>The 32-byte witness programs are concatenated in output order and <strong>trailing zero bytes are stripped</strong> from the end of the concatenated buffer.</p></div></li>
+        <li><span class="rule-id">E-10</span><div class="rule-body"><p>Bytes 0 and 1 are a big-endian unsigned 16-bit length, as in E-6. The slice <code>buffer[2 : 2 + length]</code> must begin with <code>stamp:</code>; the payload is that slice with the prefix removed. No decryption is applied.</p></div></li>
+        <li><span class="rule-id">E-11</span><div class="rule-body"><p>Transactions decoded through Carrier B have keyburn set to 1 by the decoder, since the burn-key requirement of E-2 has no equivalent here.</p></div></li>
+        <li><span class="rule-id">E-12</span><div class="rule-body"><p><strong>Carrier B takes precedence.</strong> If a transaction contains any qualifying P2WSH data output, the multisig branch of E-1 is not attempted, <em>even when the P2WSH length check in E-10 fails and the transaction ends up carrying nothing</em>. Implementers must reproduce this exclusion: adding a multisig fallback here changes which transactions are valid and forks the index.</p></div></li>
+      </ul>
+
+      <div class="note note-warn">
+        <span class="note-title">Not a carrier</span>
+        <p><code>OP_RETURN</code> outputs do not carry SRC-20 payloads. The indexer notices whether a transaction has an <code>OP_RETURN</code> output, but only to exclude certain classic Stamps; it never reads SRC-20 JSON from one. OLGA transactions commonly contain an <code>OP_RETURN</code> output for unrelated reasons, and the flag is explicitly reset for them.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="heights" class="prose-wide">
+      <h2>5. Activation heights</h2>
+      <p>SRC-20 has changed behaviour at specific Bitcoin block heights. An indexer that does not reproduce these heights will not reproduce the ledger.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Consensus-relevant heights, from <code>indexer/src/config.py</code></caption>
+          <thead>
+            <tr><th scope="col">Height</th><th scope="col">Constant</th><th scope="col">Effect on SRC-20</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="col-narrow"><code>788041</code></td><td><code>CP_SRC20_GENESIS_BLOCK</code></td><td>First SRC-20 activity. Operations at this stage ride inside Counterparty issuances.</td></tr>
+            <tr><td class="col-narrow"><code>793068</code></td><td><code>BTC_SRC20_GENESIS_BLOCK</code></td><td>First SRC-20 carried directly on Bitcoin with no Counterparty encoding.</td></tr>
+            <tr><td class="col-narrow"><code>796000</code></td><td><code>CP_SRC20_END_BLOCK</code></td><td><strong>Every Counterparty-encoded SRC-20 operation at or after this height is ignored.</strong> From here the protocol is direct-to-Bitcoin only.</td></tr>
+            <tr><td class="col-narrow"><code>833000</code></td><td><code>CP_P2WSH_FEAT_BLOCK_START</code></td><td>Numeric parsing becomes strict. Below this height a numeric string had every character that was not a digit or a dot silently removed before parsing; at and above it, a malformed numeric string excludes the transaction. See rule N-6.</td></tr>
+            <tr><td class="col-narrow"><code>865000</code></td><td><code>BTC_SRC20_OLGA_BLOCK</code></td><td>Carrier B (OLGA P2WSH) becomes available for SRC-20.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note note-warn">
+        <span class="note-title">The height that catches people out</span>
+        <p>Height 833000 is not about P2WSH for SRC-20, despite the constant's name. For SRC-20 it is the height at which numeric strings stopped being scrubbed. A payload with <code>"max": "21,000,000"</code> was read as 21000000 before 833000 and is rejected outright after it. Any indexer that applies today's strict rule to historical blocks will produce a different supply for affected tokens.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="payload" class="prose-wide">
+      <h2>6. The JSON payload</h2>
+
+      <ul class="rules">
+        <li><span class="rule-id">P-1</span><div class="rule-body"><p>The payload is a single UTF-8 JSON object. It is parsed once; a parse failure excludes the transaction silently.</p></div></li>
+        <li><span class="rule-id">P-2</span><div class="rule-body"><p><strong>Numbers in scientific notation are rejected.</strong> During JSON parsing, any numeric literal whose text contains <code>e</code> or <code>E</code> raises an error and the whole transaction is excluded. <code>1e6</code> is not a valid supply.</p></div></li>
+        <li><span class="rule-id">P-3</span><div class="rule-body"><p>The <code>p</code> field selects the sub-protocol and is compared <strong>case-insensitively</strong>: a payload is SRC-20 when <code>p</code> lowercased equals <code>src-20</code>. <code>SRC-20</code>, <code>src-20</code> and <code>Src-20</code> are all accepted; <code>SRC20</code> without the hyphen is not.</p></div></li>
+        <li><span class="rule-id">P-4</span><div class="rule-body"><p>The <code>op</code> field is <strong>uppercased</strong> before dispatch, so <code>deploy</code>, <code>Deploy</code> and <code>DEPLOY</code> are equivalent. Recognised values are <code>DEPLOY</code>, <code>MINT</code> and <code>TRANSFER</code>. Anything else is recorded as an unsupported operation and is invalid.</p></div></li>
+        <li><span class="rule-id">P-5</span><div class="rule-body"><p>Field presence is checked as a <strong>superset</strong>. A payload qualifies for an operation's shape when it contains at least that operation's required keys. Unknown extra fields do not invalidate a payload; they are carried along and, for DEPLOY, some of them are stored as metadata.</p></div></li>
+        <li><span class="rule-id">P-6</span><div class="rule-body"><p>An empty string value in any field is normalised to null before validation. A field present with value <code>""</code> is treated as a field that was not supplied.</p></div></li>
+        <li><span class="rule-id">P-7</span><div class="rule-body"><p>Numeric fields accept either a JSON string or a JSON number. Both are converted to arbitrary-precision decimals. Floats are formatted without exponent before conversion.</p></div></li>
+      </ul>
+
+      <div class="note">
+        <span class="note-title">Difference from BRC-20</span>
+        <p>BRC-20 uses <code>"p": "brc-20"</code> and requires string values for amounts. SRC-20 uses <code>"p": "src-20"</code> and accepts numbers as well as strings. The field names <code>tick</code>, <code>max</code>, <code>lim</code>, <code>amt</code> look identical between the two protocols, which is exactly why payloads get copied across and then fail: the ticker rules, the decimal defaults and the carrier are all different.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="ticker" class="prose-wide">
+      <h2>7. Ticker rules</h2>
+
+      <ul class="rules">
+        <li><span class="rule-id">T-1</span><div class="rule-body"><p>A ticker is at most <strong>5 code points</strong>. The limit is counted in Unicode code points, not bytes, so a five-emoji ticker is legal and occupies 20 bytes.</p></div></li>
+        <li><span class="rule-id">T-2</span><div class="rule-body"><p>A ticker must be non-empty and every character must belong to the allowed set. The allowed ASCII characters are exactly:</p>
+          <pre><code>. ! # $ % &amp; ( ) *
+0 1 2 3 4 5 6 7 8 9
+&lt; = &gt; ? @
+A-Z  ^  _  a-z  ~</code></pre>
+          <p>Note what is absent: <strong>no space, no hyphen, no comma, no plus, no slash, no colon, no quote or bracket characters of any kind</strong>.</p></div></li>
+        <li><span class="rule-id">T-3</span><div class="rule-body"><p>In addition, a fixed allowlist of emoji code points is permitted. It is an explicit list of single code points in the U+1F004 to U+1FAD6 range, not a general Unicode category test. Skin-tone modifiers, variation selectors and zero-width-joiner sequences are <strong>not</strong> in the list, so a composed emoji such as a flag or a family sequence fails T-2.</p></div></li>
+        <li><span class="rule-id">T-4</span><div class="rule-body"><p>Tickers are <strong>case-insensitive</strong>. The ticker is lowercased before any comparison, so <code>KEVIN</code>, <code>kevin</code> and <code>KeViN</code> are one and the same token.</p></div></li>
+        <li><span class="rule-id">T-5</span><div class="rule-body"><p>Before matching, the ticker string is re-decoded from Latin-1 to UTF-8 where that succeeds. This repairs tickers that were mis-decoded upstream and is part of how emoji tickers survive the pipeline.</p></div></li>
+        <li><span class="rule-id">T-6</span><div class="rule-body"><p>Each token also carries a <dfn>tick hash</dfn>: the <strong>SHA3-256</strong> (NIST SHA3, not Keccak) hex digest of the lowercased ticker. Indexers use it as a stable key for tickers containing characters that are awkward in a database column.</p></div></li>
+      </ul>
+
+      <ul class="denoms">
+        <li class="denom denom-outline"><span class="denom-label">Max ticker length</span><span class="denom-value">5</span><span class="denom-note">Unicode code points</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Case handling</span><span class="denom-value small">lowercased</span><span class="denom-note">before every comparison</span></li>
+        <li class="denom denom-outline"><span class="denom-label">Tick hash</span><span class="denom-value small">SHA3-256</span><span class="denom-note">of the lowercased ticker</span></li>
+      </ul>
+
+      <div class="note note-warn">
+        <span class="note-title">Difference from BRC-20</span>
+        <p>BRC-20 tickers are exactly 4 bytes. SRC-20 tickers are 1 to 5 code points from a restricted character set. A valid BRC-20 ticker is usually a valid SRC-20 ticker, but the reverse frequently is not, and a 5-character SRC-20 ticker has no BRC-20 equivalent.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="numbers" class="prose-wide">
+      <h2>8. Numeric rules</h2>
+
+      <ul class="rules">
+        <li><span class="rule-id">N-1</span><div class="rule-body"><p>The value of <code>max</code>, <code>lim</code> and <code>amt</code> must satisfy <code>0 &le; value &le; 18446744073709551615</code>, that is, the unsigned 64-bit maximum. A value outside the range, or a NaN, excludes the transaction.</p></div></li>
+        <li><span class="rule-id">N-2</span><div class="rule-body"><p>Numeric text must match <code>^[0-9]*(\.[0-9]*)?$</code>. A leading sign, a thousands separator, whitespace, or any other character fails the match and sets the field to null with an invalid-number status.</p></div></li>
+        <li><span class="rule-id">N-3</span><div class="rule-body"><p><strong><code>max</code> and <code>lim</code> are truncated to integers, rounding down.</strong> A deploy declaring <code>"lim": "1000.9"</code> deploys a mint limit of 1000. This truncation is applied to <code>max</code> and <code>lim</code> only.</p></div></li>
+        <li><span class="rule-id">N-4</span><div class="rule-body"><p><strong><code>amt</code> is <em>not</em> truncated.</strong> It keeps its fractional part and is checked against the token's declared decimals instead. This asymmetry is real and is a common source of implementation divergence.</p></div></li>
+        <li><span class="rule-id">N-5</span><div class="rule-body"><p><code>dec</code> must match <code>^[0-9]+$</code> and lie in <strong>0 to 18 inclusive</strong>. A value outside that range, or non-integer text, sets <code>dec</code> to null with an invalid-decimal status. When a DEPLOY omits <code>dec</code>, the token's decimals default to <strong>18</strong>.</p></div></li>
+        <li><span class="rule-id">N-6</span><div class="rule-body"><p><strong>Below height 833000 only</strong>, a numeric supplied as a string had every character that was not a digit or a dot removed before parsing. <code>"21,000,000"</code> became <code>21000000</code>, and <code>"1 000"</code> became <code>1000</code>. At and above 833000 the string is parsed strictly and a malformed value excludes the transaction. Historical blocks must be replayed with the old behaviour.</p></div></li>
+        <li><span class="rule-id">N-7</span><div class="rule-body"><p>For MINT and TRANSFER, the number of decimal places in <code>amt</code> after normalisation must not exceed the token's <code>dec</code>. If it does, the operation is invalid with an invalid-decimal status. Trailing zeros do not count, because the value is normalised first: <code>1.500</code> against a token with <code>dec</code> of 1 is fine, because it normalises to <code>1.5</code>.</p></div></li>
+      </ul>
+
+      <ul class="denoms">
+        <li class="denom"><span class="denom-label">Numeric ceiling</span><span class="denom-value small">18446744073709551615</span><span class="denom-note">2<sup>64</sup> minus 1, for max, lim and amt</span></li>
+        <li class="denom"><span class="denom-label">Decimals range</span><span class="denom-value">0 &ndash; 18</span><span class="denom-note">default 18 when omitted</span></li>
+        <li class="denom"><span class="denom-label">Rounding</span><span class="denom-value small">ROUND_DOWN</span><span class="denom-note">max and lim only, never amt</span></li>
+      </ul>
+
+      <div class="note note-warn">
+        <span class="note-title">Difference from BRC-20</span>
+        <p>BRC-20 defaults <code>dec</code> to 18 as well, but its ceiling is <code>uint64_max</code> expressed differently and its reference indexers reject fractional <code>max</code>/<code>lim</code> outright rather than truncating them. If you port a BRC-20 validator to SRC-20 without changing the rounding behaviour, deploys with fractional limits will disagree.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="operations" class="prose-wide">
+      <h2>9. Operations</h2>
+      <p>Three operations are recognised. In each table, "required" means the key must be present for the payload to be considered that operation's shape at all.</p>
+
+      <h3 id="op-deploy">9.1 DEPLOY</h3>
+      <p>Creates a token. Required key set: <code>op</code>, <code>tick</code>, <code>max</code>, <code>lim</code>.</p>
+      <div class="table-scroll">
+        <table>
+          <caption>DEPLOY fields</caption>
+          <thead><tr><th scope="col">Field</th><th scope="col">Required</th><th scope="col">Type</th><th scope="col">Rules</th></tr></thead>
+          <tbody>
+            <tr><td><code>p</code></td><td class="yes">Yes</td><td>string</td><td>Lowercased must equal <code>src-20</code>. See P-3.</td></tr>
+            <tr><td><code>op</code></td><td class="yes">Yes</td><td>string</td><td>Uppercased must equal <code>DEPLOY</code>.</td></tr>
+            <tr><td><code>tick</code></td><td class="yes">Yes</td><td>string</td><td>Rules T-1 to T-5.</td></tr>
+            <tr><td><code>max</code></td><td class="yes">Yes</td><td>string or number</td><td>Total supply. Truncated down to an integer (N-3), range N-1.</td></tr>
+            <tr><td><code>lim</code></td><td class="yes">Yes</td><td>string or number</td><td>Maximum per single mint. Truncated down (N-3), range N-1.</td></tr>
+            <tr><td><code>dec</code></td><td>No</td><td>string or number</td><td>Decimal places, 0 to 18. Defaults to <strong>18</strong> when absent (N-5).</td></tr>
+            <tr><td><code>desc</code></td><td>No</td><td>string</td><td>Stored as token metadata. No protocol effect.</td></tr>
+            <tr><td><code>x</code></td><td>No</td><td>string</td><td>Metadata: X / Twitter handle. No protocol effect.</td></tr>
+            <tr><td><code>web</code></td><td>No</td><td>string</td><td>Metadata: website. No protocol effect.</td></tr>
+            <tr><td><code>email</code></td><td>No</td><td>string</td><td>Metadata: contact email. No protocol effect.</td></tr>
+            <tr><td><code>tg</code></td><td>No</td><td>string</td><td>Metadata: Telegram. No protocol effect.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">Metadata fields are written to a separate table and later deploys of the same ticker cannot overwrite them with nulls. They do not participate in validity.</p>
+
+      <h3 id="op-mint">9.2 MINT</h3>
+      <p>Issues supply to the transaction's destination address. Required key set: <code>op</code>, <code>tick</code>, <code>amt</code>.</p>
+      <div class="table-scroll">
+        <table>
+          <caption>MINT fields</caption>
+          <thead><tr><th scope="col">Field</th><th scope="col">Required</th><th scope="col">Type</th><th scope="col">Rules</th></tr></thead>
+          <tbody>
+            <tr><td><code>p</code></td><td class="yes">Yes</td><td>string</td><td>Lowercased must equal <code>src-20</code>.</td></tr>
+            <tr><td><code>op</code></td><td class="yes">Yes</td><td>string</td><td>Uppercased must equal <code>MINT</code>.</td></tr>
+            <tr><td><code>tick</code></td><td class="yes">Yes</td><td>string</td><td>Must name an already deployed token (V-4).</td></tr>
+            <tr><td><code>amt</code></td><td class="yes">Yes</td><td>string or number</td><td>Amount to mint. Not truncated (N-4). Decimal places checked against <code>dec</code> (N-7). May be clamped, see V-6 and V-7.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>The minted balance is credited to output 0's address, not to the sender.</strong> Minting to someone else is therefore expressed simply by paying output 0 to them.</p>
+
+      <h3 id="op-transfer">9.3 TRANSFER</h3>
+      <p>Moves balance from the sender to the destination. Required key set: <code>op</code>, <code>tick</code>, <code>amt</code>.</p>
+      <div class="table-scroll">
+        <table>
+          <caption>TRANSFER fields</caption>
+          <thead><tr><th scope="col">Field</th><th scope="col">Required</th><th scope="col">Type</th><th scope="col">Rules</th></tr></thead>
+          <tbody>
+            <tr><td><code>p</code></td><td class="yes">Yes</td><td>string</td><td>Lowercased must equal <code>src-20</code>.</td></tr>
+            <tr><td><code>op</code></td><td class="yes">Yes</td><td>string</td><td>Uppercased must equal <code>TRANSFER</code>.</td></tr>
+            <tr><td><code>tick</code></td><td class="yes">Yes</td><td>string</td><td>Must name an already deployed token (V-4).</td></tr>
+            <tr><td><code>amt</code></td><td class="yes">Yes</td><td>string or number</td><td>Amount to move. <strong>Never clamped.</strong> If the sender's balance is short, the whole transfer is invalid (V-9).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note note-warn">
+        <span class="note-title">BULK_XFER is not live</span>
+        <p>The reference indexer contains a <code>handle_bulk_transfer</code> function and a <code>BULK_XFER</code> key set (<code>op</code>, <code>tick</code>, <code>amt</code>, <code>destinations</code>) that would airdrop an amount to every holder of another ticker. <strong>It is unreachable.</strong> Operation dispatch matches only <code>DEPLOY</code>, <code>MINT</code> and <code>TRANSFER</code>; every other value, <code>BULK_XFER</code> included, falls to the unsupported-operation branch and is marked invalid. Do not implement it, and do not broadcast it.</p>
+      </div>
+    </section>
+
+    <hr class="perf">
+
+    <section id="validity" class="prose-wide">
+      <h2>10. Validity and state transitions</h2>
+
+      <figure class="plate">
+        <p class="plate-title">Plate IV &middot; Token lifecycle</p>
+        <div class="plate-scroll">
+        <svg class="dgm" viewBox="0 0 700 250" role="img" aria-labelledby="plate4-t plate4-d">
+          <title id="plate4-t">SRC-20 token lifecycle</title>
+          <desc id="plate4-d">A deploy creates the token and fixes max, lim and dec. Mints add to total minted and credit output zero's address, and are clamped to whichever of the remaining supply or the per-mint limit is smaller. When total minted reaches max, further mints are over-mint and invalid. Transfers move balance between addresses and are rejected outright when the sender's balance is insufficient.</desc>
+
+          <rect class="d-box-accent" x="14" y="34" width="150" height="62"/>
+          <text class="d-title" x="26" y="55">DEPLOY</text>
+          <text class="d-label" x="26" y="72">fixes max, lim, dec</text>
+          <text class="d-label" x="26" y="88">first one wins</text>
+
+          <path class="d-arrow" d="M164 65 L214 65" marker-end="url(#ar4)"/>
+
+          <rect class="d-box-accent" x="216" y="34" width="160" height="62"/>
+          <text class="d-title" x="228" y="55">MINT</text>
+          <text class="d-label" x="228" y="72">credits output 0</text>
+          <text class="d-label" x="228" y="88">amt clamped, still valid</text>
+
+          <path class="d-arrow" d="M376 65 L426 65" marker-end="url(#ar4)"/>
+
+          <rect class="d-box-accent" x="428" y="34" width="160" height="62"/>
+          <text class="d-title" x="440" y="55">TRANSFER</text>
+          <text class="d-label" x="440" y="72">sender &rarr; output 0</text>
+          <text class="d-label" x="440" y="88">never clamped</text>
+
+          <path class="d-line" d="M296 96 L296 122" stroke-dasharray="4 3"/>
+          <path class="d-line" d="M508 96 L508 122" stroke-dasharray="4 3"/>
+
+          <rect class="d-box-warn" x="196" y="124" width="200" height="52"/>
+          <text class="d-label" x="208" y="143">total minted &ge; max</text>
+          <text class="d-label" x="208" y="161">&rarr; OM, invalid</text>
+
+          <rect class="d-box-warn" x="408" y="124" width="200" height="52"/>
+          <text class="d-label" x="420" y="143">balance &lt; amt</text>
+          <text class="d-label" x="420" y="161">&rarr; BB, invalid, no partial fill</text>
+
+          <path class="d-perf" d="M14 200 L686 200"/>
+          <text class="d-label" x="14" y="224">Order within a block is transaction order. Balances update as the block is processed.</text>
+
+          <defs>
+            <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="d-fill-accent"/>
+            </marker>
+          </defs>
+        </svg>
+        </div>
+        <figcaption>Plate IV. The asymmetry between MINT and TRANSFER is the single most important behavioural rule in the protocol: an over-large mint is trimmed and still counts, while an over-large transfer is thrown away entirely.</figcaption>
+      </figure>
+
+      <h3>10.1 DEPLOY</h3>
+      <ul class="rules">
+        <li><span class="rule-id">V-1</span><div class="rule-body"><p>A DEPLOY is valid when the ticker has <strong>no existing deploy</strong> and both <code>max</code> and <code>lim</code> are present and non-zero after processing.</p></div></li>
+        <li><span class="rule-id">V-2</span><div class="rule-body"><p><strong>First deploy wins.</strong> Any later DEPLOY of the same ticker is invalid with status <code>DE</code>. There is no re-deploy, no transfer of deploy authority, and no way to change <code>max</code>, <code>lim</code> or <code>dec</code> afterwards.</p></div></li>
+        <li><span class="rule-id">V-3</span><div class="rule-body"><p>Within a single block, transactions are processed in block order, so the earlier transaction in the block takes the ticker.</p></div></li>
+      </ul>
+
+      <h3>10.2 MINT</h3>
+      <ul class="rules">
+        <li><span class="rule-id">V-4</span><div class="rule-body"><p>A MINT for a ticker with no deploy is invalid with status <code>ND</code>.</p></div></li>
+        <li><span class="rule-id">V-5</span><div class="rule-body"><p>If total minted is already greater than or equal to <code>max</code>, the mint is invalid with status <code>OM</code>. The token is finished.</p></div></li>
+        <li><span class="rule-id">V-6</span><div class="rule-body"><p><strong>If <code>amt</code> exceeds the remaining supply, it is reduced to exactly the remaining supply and the mint remains VALID</strong>, with status <code>OMA</code> recording the reduction. This is how the final mint of a token behaves: whoever mints last receives only the dust that is left, not nothing.</p></div></li>
+        <li><span class="rule-id">V-7</span><div class="rule-body"><p><strong>If <code>amt</code> exceeds the effective per-mint limit, it is reduced to that limit and the mint remains VALID</strong>, with status <code>ODL</code>. The effective limit is <code>min(lim, max)</code>: a deploy whose <code>lim</code> is larger than its <code>max</code> silently behaves as though <code>lim</code> equalled <code>max</code>.</p></div></li>
+        <li><span class="rule-id">V-8</span><div class="rule-body"><p>Both clamps can apply to one mint, the remaining-supply clamp first and then the per-mint clamp. The credited amount is the one that survives both.</p></div></li>
+      </ul>
+
+      <div class="note note-warn">
+        <span class="note-title">The clamping gotcha</span>
+        <p><code>OMA</code> and <code>ODL</code> are <strong>not</strong> failure statuses. In the reference implementation each status carries an <code>is_invalid</code> flag, and for these two it is false. A validator that treats "amount was reduced" as "operation rejected" will under-count supply and diverge from every other indexer. If you take one rule from this page, take this one.</p>
+      </div>
+
+      <h3>10.3 TRANSFER</h3>
+      <ul class="rules">
+        <li><span class="rule-id">V-9</span><div class="rule-body"><p>A TRANSFER is valid only when the sender's running balance is <strong>greater than or equal to</strong> <code>amt</code> at the moment the operation is processed. Otherwise it is invalid with status <code>BB</code> and <strong>nothing moves</strong>. There is no partial transfer.</p></div></li>
+        <li><span class="rule-id">V-10</span><div class="rule-body"><p>A TRANSFER for a ticker with no deploy is invalid with status <code>ND</code>.</p></div></li>
+        <li><span class="rule-id">V-11</span><div class="rule-body"><p>A self-transfer, where the creator and the destination are the same address, is handled explicitly and is valid if the balance check passes. It is a no-op on the balance.</p></div></li>
+        <li><span class="rule-id">V-12</span><div class="rule-body"><p>"Running balance" includes the effect of earlier valid operations in the same block. Two transfers of the full balance in one block cannot both succeed; the second sees a zero balance and fails with <code>BB</code>.</p></div></li>
+      </ul>
+    </section>
+
+    <hr class="perf">
+
+    <section id="invalid" class="prose-wide">
+      <h2>11. Invalidity conditions</h2>
+      <p>The reference indexer records a status code on every processed operation. The table is reproduced exactly, including which codes leave the operation valid.</p>
+
+      <div class="table-scroll">
+        <table>
+          <caption>Status codes from <code>Src20Processor.STATUS_MESSAGES</code></caption>
+          <thead><tr><th scope="col">Code</th><th scope="col">Meaning</th><th scope="col">Applies to</th><th scope="col">Operation invalid?</th></tr></thead>
+          <tbody>
+            <tr><td><code>DE</code></td><td>Deploy already exists for this ticker</td><td>DEPLOY</td><td class="no">Yes</td></tr>
+            <tr><td><code>ND</code></td><td>No deploy exists for this ticker</td><td>MINT, TRANSFER</td><td class="no">Yes</td></tr>
+            <tr><td><code>OM</code></td><td>Over mint: total minted already at or above max</td><td>MINT</td><td class="no">Yes</td></tr>
+            <tr><td><code>NA</code></td><td>Missing or empty amount</td><td>MINT, TRANSFER</td><td class="no">Yes</td></tr>
+            <tr><td><code>OMA</code></td><td>Amount reduced to the remaining supply</td><td>MINT</td><td class="yes">No, still valid</td></tr>
+            <tr><td><code>ODL</code></td><td>Amount reduced to the per-mint limit</td><td>MINT</td><td class="yes">No, still valid</td></tr>
+            <tr><td><code>BB</code></td><td>Balance below the transfer amount</td><td>TRANSFER</td><td class="no">Yes</td></tr>
+            <tr><td><code>UO</code></td><td>Unsupported operation</td><td>any other <code>op</code></td><td class="no">Yes</td></tr>
+            <tr><td><code>ID</code></td><td>Amount has more decimal places than the token's <code>dec</code></td><td>MINT, TRANSFER</td><td class="no">Yes</td></tr>
+            <tr><td><code>NN</code></td><td>Numeric field failed its regex, or <code>dec</code> out of range</td><td>any</td><td class="no">Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>11.1 Exclusion versus invalidity</h3>
+      <p>These are different outcomes and the distinction matters when reconciling two indexers.</p>
+      <dl class="terms">
+        <dt>Excluded</dt>
+        <dd>The transaction never becomes an SRC-20 record at all. It is not listed, not counted, and carries no status. Exclusion happens when the carrier fails to decode, the prefix is missing, the JSON does not parse, scientific notation is present, the ticker fails T-1 to T-3, or a required numeric is out of range or unparseable.</dd>
+        <dt>Invalid</dt>
+        <dd>The transaction is recognised as an SRC-20 operation and recorded, but it does not change any balance. It appears in activity feeds with its status code. Everything in the table above with "Yes" in the last column is in this category.</dd>
+        <dt>Valid</dt>
+        <dd>The operation changes state. Note that <code>OMA</code> and <code>ODL</code> operations are valid and do change state, just by less than the payload asked for.</dd>
+      </dl>
+
+      <h3>11.2 Carrier-level exclusions</h3>
+      <ul class="rules">
+        <li><span class="rule-id">X-1</span><div class="rule-body"><p>Multisig-carried SRC-20 without keyburn set to 1 is not an SRC-20 transaction (E-2).</p></div></li>
+        <li><span class="rule-id">X-2</span><div class="rule-body"><p>A transaction whose declared length exceeds the data actually present fails decoding (E-6).</p></div></li>
+        <li><span class="rule-id">X-3</span><div class="rule-body"><p>A transaction carrying a qualifying P2WSH data output whose payload fails the prefix or length check is excluded, and the multisig branch is not tried (E-12).</p></div></li>
+        <li><span class="rule-id">X-4</span><div class="rule-body"><p>A Counterparty-encoded SRC-20 operation at or after height 796000 is ignored (see section 12).</p></div></li>
+      </ul>
+    </section>
+
+    <hr class="perf">
+
+    <section id="counterparty" class="prose-wide">
+      <h2>12. The Counterparty dependency</h2>
+      <p>SRC-20 is often described as "built on Counterparty". That was true for roughly 8000 blocks and has not been true since. The accurate account is:</p>
+
+      <ul class="rules">
+        <li><span class="rule-id">CP-1</span><div class="rule-body"><p>From height <strong>788041</strong>, SRC-20 operations were carried inside Counterparty asset issuances. For such a transaction to count, the indexer required a Counterparty asset id (<code>cpid</code>) that <strong>begins with <code>A</code></strong>, meaning a numeric asset rather than a named one, and a declared <strong>supply of 0</strong>.</p></div></li>
+        <li><span class="rule-id">CP-2</span><div class="rule-body"><p>From height <strong>793068</strong>, SRC-20 operations began appearing directly on Bitcoin with no Counterparty encoding at all.</p></div></li>
+        <li><span class="rule-id">CP-3</span><div class="rule-body"><p>From height <strong>796000</strong>, <strong>Counterparty-encoded SRC-20 is ignored entirely.</strong> A transaction only counts from this height onward if it has no Counterparty asset id. In code, validity is <code>valid_cp_src20() or (is_src20() and not cpid)</code>, and <code>valid_cp_src20()</code> itself requires <code>block_index &lt; 796000</code>.</p></div></li>
+        <li><span class="rule-id">CP-4</span><div class="rule-body"><p><strong>An indexer built today still needs Counterparty</strong>, but only to replay history below 796000 and to index classic Stamps, which remain Counterparty assets. SRC-20 state from 796000 onward can be derived from Bitcoin alone.</p></div></li>
+      </ul>
+
+      <div class="note">
+        <span class="note-title">Say it accurately</span>
+        <p>"SRC-20 is encoded through the Counterparty data layer" describes blocks 788041 to 795999. For every block since, SRC-20 is a Bitcoin-native protocol that shares a data carrier with Bitcoin Stamps and needs no Counterparty parsing. Both halves of that sentence matter: the history is genuinely Counterparty, and the present genuinely is not.</p>
+      </div>
+    </section>
+
+    <nav class="page-nav" aria-label="Page">
+      <a href="index.html">&larr; Overview</a>
+      <a href="guide.html">Guide &rarr;</a>
+    </nav>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h2>Documentation</h2>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="specification.html">Specification</a></li>
+          <li><a href="guide.html">Guide</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="vectors.html">Test vectors</a></li>
+          <li><a href="validator.html">Validator</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href="https://docs.bitcoinuniverse.io">Bitcoin Universe docs portal</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20">Source repository</a></li>
+          <li><a href="https://github.com/stampchain-io/btc_stamps">Bitcoin Stamps indexer</a></li>
+          <li><a href="https://stampchain.io/">Stampchain explorer</a></li>
+          <li><a href="https://github.com/bitcoinuniverseio/src-20/security/advisories/new">Report a vulnerability</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This document</h2>
+        <dl class="footer-meta">
+          <dt>Owning repository</dt><dd>bitcoinuniverseio/src-20</dd>
+          <dt>Source path</dt><dd><code>specification.html</code></dd>
+          <dt>Spec version</dt><dd>2026.09.01</dd>
+          <dt>Lifecycle</dt><dd>Stable</dd>
+          <dt>Chain / network</dt><dd>Bitcoin mainnet</dd>
+          <dt>Last verified</dt><dd><time datetime="2026-09-01">1 September 2026</time></dd>
+        </dl>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>SRC-20 originated in the Bitcoin Stamps community. This site documents it; it does not own it.</span>
+      <a href="https://github.com/bitcoinuniverseio/src-20/edit/main/specification.html">Edit this page on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>
