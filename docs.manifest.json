@@ -1,13 +1,15 @@
 {
   "schemaVersion": 1,
   "id": "src-20",
-  "name": "Bitcoin Stamps, SRC-20 and SRC-101",
+  "name": "SRC-20",
   "classification": "protocol",
   "repository": "bitcoinuniverseio/src-20",
   "documentationUrl": "https://docs.bitcoinuniverse.io/protocols/src-20/",
   "docsRoot": ".",
   "sourceRef": "main",
-  "lifecycle": "experimental",
+  "releasedRef": "6d5e8d9aa78be8464e07f5e6381708b663a43e89",
+  "releaseVersion": "2026.09.01",
+  "lifecycle": "stable",
   "chains": [
     {
       "chain": "bitcoin",
@@ -18,18 +20,34 @@
   ],
   "protocols": [
     "src-20",
-    "src-101"
+    "src20",
+    "src-101",
+    "src101",
+    "stamps",
+    "counterparty"
   ],
   "audiences": [
     "user",
+    "collector",
     "app-developer",
-    "protocol-implementer"
+    "protocol-implementer",
+    "indexer-operator"
+  ],
+  "specifications": [
+    "specification.html"
   ],
   "owners": [
     "bitcoinuniverseio"
   ],
+  "upstream": {
+    "project": "Bitcoin Stamps / SRC-20",
+    "url": "https://github.com/stampchain-io/btc_stamps",
+    "license": "AGPL-3.0",
+    "relationship": "derived",
+    "divergenceSummary": "SRC-20 originated in the Bitcoin Stamps community, not in Bitcoin Universe. This repository documents the protocol as the Stamps ecosystem indexes it and marks every Bitcoin Universe indexing or product decision as Universe-specific."
+  },
   "lastVerified": {
-    "commit": "79c3c3e2ece28fd896ce80306daa80f4f01526f6",
+    "commit": "6d5e8d9aa78be8464e07f5e6381708b663a43e89",
     "timestamp": "2026-09-01T02:00:00Z"
   },
   "securityClassification": "public"
