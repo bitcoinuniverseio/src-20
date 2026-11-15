@@ -1,0 +1,25 @@
+name: Static site checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: [self-hosted, Linux, X64, universe]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON and relative links
+        run: |
+          python3 -m json.tool docs.manifest.json > /dev/null
+          python3 -m json.tool search-index.json > /dev/null
+          python3 scripts/check-local-links.py
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/site.js
+          node --check assets/validator.js
